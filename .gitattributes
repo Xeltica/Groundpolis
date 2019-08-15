@@ -1,3 +1,9 @@
 *.svg -diff -text
 *.psd -diff -text
 *.ai -diff -text
+*.obj -diff -text
+*.mtl -diff -text
+*.mqo -diff -text
+*.glb -diff -text
+*.blend -diff -text
+*.blend1 -diff -text

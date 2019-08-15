@@ -1,0 +1,142 @@
+[
+	{
+		"id": "milk",
+		"place": "floor"
+	},
+	{
+		"id": "bed",
+		"place": "floor"
+	},
+	{
+		"id": "low-table-black",
+		"place": "floor"
+	},
+	{
+		"id": "low-table-white",
+		"place": "floor"
+	},
+	{
+		"id": "desk",
+		"place": "floor"
+	},
+	{
+		"id": "desk2",
+		"place": "floor"
+	},
+	{
+		"id": "chair",
+		"place": "floor"
+	},
+	{
+		"id": "chair3",
+		"place": "floor"
+	},
+	{
+		"id": "fan",
+		"place": "wall"
+	},
+	{
+		"id": "pc",
+		"place": "floor"
+	},
+	{
+		"id": "plant",
+		"place": "floor"
+	},
+	{
+		"id": "plant2",
+		"place": "floor"
+	},
+	{
+		"id": "eraser",
+		"place": "floor"
+	},
+	{
+		"id": "pencil",
+		"place": "floor"
+	},
+	{
+		"id": "pudding",
+		"place": "floor"
+	},
+	{
+		"id": "cardboard-box",
+		"place": "floor"
+	},
+	{
+		"id": "cardboard-box2",
+		"place": "floor"
+	},
+	{
+		"id": "cardboard-box3",
+		"place": "floor"
+	},
+	{
+		"id": "book",
+		"place": "floor"
+	},
+	{
+		"id": "piano",
+		"place": "floor"
+	},
+	{
+		"id": "facial-tissue",
+		"place": "floor"
+	},
+	{
+		"id": "server",
+		"place": "floor"
+	},
+	{
+		"id": "moon",
+		"place": "floor"
+	},
+	{
+		"id": "corkboard",
+		"place": "wall"
+	},
+	{
+		"id": "mousepad",
+		"place": "floor"
+	},
+	{
+		"id": "monitor",
+		"place": "floor"
+	},
+	{
+		"id": "keyboard",
+		"place": "floor"
+	},
+	{
+		"id": "carpet",
+		"place": "floor"
+	},
+	{
+		"id": "mat",
+		"place": "floor"
+	},
+	{
+		"id": "color-box",
+		"place": "floor"
+	},
+	{
+		"id": "color-box2",
+		"place": "floor"
+	},
+	{
+		"id": "wall-clock",
+		"place": "wall"
+	},
+	{
+		"id": "cube",
+		"place": "floor"
+	},
+	{
+		"id": "photoframe",
+		"place": "wall"
+	},
+	{
+		"id": "photoframe2",
+		"place": "wall"
+	}
+]
