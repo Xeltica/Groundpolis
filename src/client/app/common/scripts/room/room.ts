@@ -343,9 +343,9 @@ export class Room {
 
 	@autobind
 	private onmousemove(ev: MouseEvent) {
-		const rect = (<HTMLElement>ev.target).getBoundingClientRect();
-		const x = ((ev.clientX - rect.left) / this.renderer.domElement.width) * 2 - 1;
-		const y = -((ev.clientY - rect.top) / this.renderer.domElement.height) * 2 + 1;
+		const rect = (ev.target as HTMLElement).getBoundingClientRect();
+		const x = (((ev.clientX * window.devicePixelRatio) - rect.left) / this.renderer.domElement.width) * 2 - 1;
+		const y = -(((ev.clientY * window.devicePixelRatio) - rect.top) / this.renderer.domElement.height) * 2 + 1;
 		const pos = new THREE.Vector2(x, y);
 
 		this.camera.updateMatrixWorld();
@@ -380,9 +380,9 @@ export class Room {
 	private onmousedown(ev: MouseEvent) {
 		if (ev.target !== this.renderer.domElement || ev.button !== 0) return;
 
-		const rect = (<HTMLElement>ev.target).getBoundingClientRect();
-		const x = ((ev.clientX - rect.left) / this.renderer.domElement.width) * 2 - 1;
-		const y = -((ev.clientY - rect.top) / this.renderer.domElement.height) * 2 + 1;
+		const rect = (ev.target as HTMLElement).getBoundingClientRect();
+		const x = (((ev.clientX * window.devicePixelRatio) - rect.left) / this.renderer.domElement.width) * 2 - 1;
+		const y = -(((ev.clientY * window.devicePixelRatio) - rect.top) / this.renderer.domElement.height) * 2 + 1;
 		const pos = new THREE.Vector2(x, y);
 
 		this.camera.updateMatrixWorld();
