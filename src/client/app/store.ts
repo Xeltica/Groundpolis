@@ -6,6 +6,7 @@ import * as nestedProperty from 'nested-property';
 import MiOS from './mios';
 import { erase } from '../../prelude/array';
 import getNoteSummary from '../../misc/get-note-summary';
+import { User } from '../../models/entities/user';
 
 const defaultSettings = {
 	keepCw: false,
@@ -53,6 +54,7 @@ const defaultDeviceSettings = {
 	mobileHomeProfile: 'Default',
 	deckProfile: 'Default',
 	deckMode: false,
+	inDeckMode: false,
 	deckColumnAlign: 'center',
 	deckColumnWidth: 'normal',
 	useShadow: false,
@@ -95,10 +97,12 @@ export default (os: MiOS) => new Vuex.Store({
 	})],
 
 	state: {
-		i: null,
+		i: null as User | null,
+		device: null as typeof defaultDeviceSettings,
+		settings: null as typeof defaultSettings,
 		indicate: false,
 		uiHeaderHeight: 0,
-		behindNotes: []
+		behindNotes: [],
 	},
 
 	getters: {
