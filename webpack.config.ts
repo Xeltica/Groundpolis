@@ -115,7 +115,7 @@ module.exports = {
 	plugins: [
 		//new HardSourceWebpackPlugin(),
 		new ProgressBarPlugin({
-			format: chalk`  {cyan.bold がんばってます} {bold [}:bar{bold ]} {green.bold :percent} {gray (:current/:total)} :elapseds`,
+			format: chalk`  {cyan.bold 少女構築中…} {bold [}:bar{bold ]} {green.bold :percent} {gray (:current/:total)} :elapseds`,
 			clear: false
 		}),
 		new webpack.DefinePlugin({

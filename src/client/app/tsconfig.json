@@ -5,26 +5,36 @@
     "noImplicitAny": false,
     "noImplicitReturns": true,
     "noUnusedParameters": false,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noFallthroughCasesInSwitch": true,
     "declaration": false,
     "sourceMap": false,
     "target": "es2017",
     "module": "esnext",
+		"lib": [
+			"esnext",
+			"dom",
+			"dom.iterable",
+			"scripthost"
+		],
     "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "jsx": "preserve",
     "removeComments": false,
-    "noLib": false,
     "strict": true,
     "strictNullChecks": false,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "typeRoots": [
-      "node_modules/@types",
+      "node_modules/",
       "src/@types"
     ]
   },
   "compileOnSave": false,
   "include": [
-    "./**/*.ts"
+    "./**/*.ts",
+		"./**/*.vue"
   ]
 }

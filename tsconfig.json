@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "noEmitOnError": false,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noImplicitReturns": true,
     "noUnusedParameters": false,
     "noUnusedLocals": true,
@@ -21,7 +21,7 @@
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
     "typeRoots": [
-      "node_modules/@types",
+      "node_modules/",
       "src/@types"
     ]
   },
@@ -30,6 +30,7 @@
     "./src/**/*.ts"
   ],
   "exclude": [
-    "./src/client/app/**/*.ts"
+    "./src/client/app/**/*.ts",
+    "./src/client/app/**/*.vue",
   ]
 }
