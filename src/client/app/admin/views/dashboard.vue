@@ -97,9 +97,11 @@ import XApLog from './dashboard.ap-log.vue';
 import { faDatabase } from '@fortawesome/free-solid-svg-icons';
 import MarqueeText from 'vue-marquee-text-component';
 import randomColor from 'randomcolor';
+import { Connection } from '../../common/scripts/Connection';
+import { Meta } from '../../../../models/entities/meta';
+import { Instance } from '../../../../models/entities/instance';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/dashboard.vue'),
 
 	components: {
@@ -109,23 +111,30 @@ export default class Vm extends Vue {
 		XApLog,
 		MarqueeText
 	},
+})
+export default class Vm extends Vue {
 
-	data() {
-		return {
-			stats: null,
-			connection: null,
-			meta: null,
-			instances: [],
-			clock: null,
-			faDatabase
-		};
-	},
+	private stats: {
+		notesCount: number,
+		originalNotesCount: number,
+		usersCount: number,
+		originalUsersCount: number,
+		instances: number,
+		driveUsageLocal: number,
+		driveUsageRemote: number
+	};
+
+	private connection: Connection;
+	private meta: Meta;
+	private instances: Instance[];
+	clock: number;
+	faDatabase;
 
 	created() {
 		this.connection = this.$root.stream.useSharedConnection('serverStats');
-
+		
 		this.updateStats();
-		this.clock = setInterval(this.updateStats, 3000);
+		this.clock = setInterval(this.updateStats as TimerHandler, 3000);
 
 		this.$root.getMeta().then(meta => {
 			this.meta = meta;
@@ -142,23 +151,21 @@ export default class Vm extends Vue {
 			}
 			this.instances = instances;
 		});
-	},
+	}
 
-	beforeDestroy() {
+	public beforeDestroy() {
 		this.connection.dispose();
 		clearInterval(this.clock);
-	},
+	}
 
-	methods: {
-		setChartSrc(src) {
-			this.$refs.charts.setSrc(src);
-		},
+	public setChartSrc(src) {
+		(this.$refs.charts as XCharts).setSrc(src);
+	}
 
-		updateStats() {
-			this.$root.api('stats', {}, true).then(stats => {
-				this.stats = stats;
-			});
-		}
+	public updateStats() {
+		this.$root.api('stats', {}, true).then(stats => {
+			this.stats = stats;
+		});
 	}
 }
 </script>
