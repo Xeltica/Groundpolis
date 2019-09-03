@@ -39,71 +39,74 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import i18n from '../../i18n';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import * as tinycolor from 'tinycolor2';
 import ApexCharts from 'apexcharts';
+
+import i18n from '../../i18n';
+import { IChartPack } from '../../common/models/interface';
 
 const limit = 90;
 
 const sum = (...arr) => arr.reduce((r, a) => r.map((b, i) => a[i] + b));
 const negate = arr => arr.map(x => -x);
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('admin/views/charts.vue'),
-	data() {
-		return {
-			chart: null,
-			src: 'notes',
-			span: 'hour',
-			chartInstance: null
-		};
-	},
+})
+export default class DashboardCharts extends Vue {
+	private chart = (null as any) as {
+			perHour: IChartPack
+			perDay: IChartPack,
+	};
 
-	computed: {
-		data(): any {
-			if (this.chart == null) return null;
-			switch (this.src) {
-				case 'federation-instances': return this.federationInstancesChart(false);
-				case 'federation-instances-total': return this.federationInstancesChart(true);
-				case 'users': return this.usersChart(false);
-				case 'users-total': return this.usersChart(true);
-				case 'active-users': return this.activeUsersChart();
-				case 'notes': return this.notesChart('combined');
-				case 'local-notes': return this.notesChart('local');
-				case 'remote-notes': return this.notesChart('remote');
-				case 'notes-total': return this.notesTotalChart();
-				case 'drive': return this.driveChart();
-				case 'drive-total': return this.driveTotalChart();
-				case 'drive-files': return this.driveFilesChart();
-				case 'drive-files-total': return this.driveFilesTotalChart();
-				case 'network-requests': return this.networkRequestsChart();
-				case 'network-time': return this.networkTimeChart();
-				case 'network-usage': return this.networkUsageChart();
-			}
-		},
+	private src = 'notes';
+	private span = 'hour';
+	private	chartInstance = null as ApexCharts | null;
+	private now = new Date();
 
-		stats(): any[] {
-			const stats =
-				this.span == 'day' ? this.chart.perDay :
-				this.span == 'hour' ? this.chart.perHour :
-				null;
-
-			return stats;
+	public get data(): any {
+		if (this.chart == null) return null;
+		switch (this.src) {
+			case 'federation-instances': return this.federationInstancesChart(false);
+			case 'federation-instances-total': return this.federationInstancesChart(true);
+			case 'users': return this.usersChart(false);
+			case 'users-total': return this.usersChart(true);
+			case 'active-users': return this.activeUsersChart();
+			case 'notes': return this.notesChart('combined');
+			case 'local-notes': return this.notesChart('local');
+			case 'remote-notes': return this.notesChart('remote');
+			case 'notes-total': return this.notesTotalChart();
+			case 'drive': return this.driveChart();
+			case 'drive-total': return this.driveTotalChart();
+			case 'drive-files': return this.driveFilesChart();
+			case 'drive-files-total': return this.driveFilesTotalChart();
+			case 'network-requests': return this.networkRequestsChart();
+			case 'network-time': return this.networkTimeChart();
+			case 'network-usage': return this.networkUsageChart();
 		}
-	},
+	}
 
-	watch: {
-		src() {
+	public get stats(): IChartPack {
+		const stats =
+			this.span == 'day' ? this.chart!.perDay :
+			this.span == 'hour' ? this.chart!.perHour :
+			null;
+
+		return stats!;
+	}
+
+	@Watch('src')
+	public watchSrc() {
 			this.render();
-		},
+	}
 
-		span() {
+	@Watch('span')
+	public watchSpan() {
 			this.render();
-		}
-	},
+	}
 
-	async mounted() {
+	public async mounted() {
 		this.now = new Date();
 
 		const [perHour, perDay] = await Promise.all([Promise.all([
@@ -144,355 +147,353 @@ export default Vue.extend({
 		this.chart = chart;
 
 		this.render();
-	},
+	}
 
-	beforeDestroy() {
-		this.chartInstance.destroy();
-	},
+	public beforeDestroy() {
+		this.chartInstance!.destroy();
+	}
 
-	methods: {
-		setSrc(src) {
-			this.src = src;
-		},
+	public setSrc(src) {
+		this.src = src;
+	}
 
-		render() {
-			if (this.chartInstance) {
-				this.chartInstance.destroy();
-			}
+	public render() {
+		if (this.chartInstance) {
+			this.chartInstance.destroy();
+		}
 
-			this.chartInstance = new ApexCharts(this.$refs.chart, {
-				chart: {
-					type: 'area',
-					height: 300,
-					animations: {
-						dynamicAnimation: {
-							enabled: false
-						}
-					},
-					toolbar: {
-						show: false
-					},
-					zoom: {
+		this.chartInstance = new ApexCharts(this.$refs.chart, {
+			chart: {
+				type: 'area',
+				height: 300,
+				animations: {
+					dynamicAnimation: {
 						enabled: false
 					}
 				},
-				dataLabels: {
+				toolbar: {
+					show: false
+				},
+				zoom: {
 					enabled: false
-				},
-				grid: {
-					clipMarkers: false,
-					borderColor: 'rgba(0, 0, 0, 0.1)',
-					xaxis: {
-						lines: {
-							show: true,
-						}
-					},
-				},
-				stroke: {
-					curve: 'straight',
-					width: 2
-				},
-				legend: {
-					labels: {
-						colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-					},
-				},
+				}
+			},
+			dataLabels: {
+				enabled: false
+			},
+			grid: {
+				clipMarkers: false,
+				borderColor: 'rgba(0, 0, 0, 0.1)',
 				xaxis: {
-					type: 'datetime',
-					labels: {
-						style: {
-							colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-						}
-					},
-					axisBorder: {
-						color: 'rgba(0, 0, 0, 0.1)'
-					},
-					axisTicks: {
-						color: 'rgba(0, 0, 0, 0.1)'
-					},
-				},
-				yaxis: {
-					labels: {
-						formatter: this.data.bytes ? v => Vue.filter('bytes')(v, 0) : v => Vue.filter('number')(v),
-						style: {
-							color: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-						}
+					lines: {
+						show: true,
 					}
 				},
-				series: this.data.series
-			});
+			},
+			stroke: {
+				curve: 'straight',
+				width: 2
+			},
+			legend: {
+				labels: {
+					colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
+				},
+			},
+			xaxis: {
+				type: 'datetime',
+				labels: {
+					style: {
+						colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
+					}
+				},
+				axisBorder: {
+					color: 'rgba(0, 0, 0, 0.1)'
+				},
+				axisTicks: {
+					color: 'rgba(0, 0, 0, 0.1)'
+				},
+			},
+			yaxis: {
+				labels: {
+					formatter: this.data.bytes ? v => Vue.filter('bytes')(v, 0) : v => Vue.filter('number')(v),
+					style: {
+						color: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
+					}
+				}
+			},
+			series: this.data.series
+		});
 
-			this.chartInstance.render();
-		},
-
-		getDate(i: number) {
-			const y = this.now.getFullYear();
-			const m = this.now.getMonth();
-			const d = this.now.getDate();
-			const h = this.now.getHours();
-
-			return (
-				this.span == 'day' ? new Date(y, m, d - i) :
-				this.span == 'hour' ? new Date(y, m, d, h - i) :
-				null
-			);
-		},
-
-		format(arr) {
-			return arr.map((v, i) => ({ x: this.getDate(i).getTime(), y: v }));
-		},
-
-		federationInstancesChart(total: boolean): any {
-			return {
-				series: [{
-					name: 'Instances',
-					data: this.format(total
-						? this.stats.federation.instance.total
-						: sum(this.stats.federation.instance.inc, negate(this.stats.federation.instance.dec))
-					)
-				}]
-			};
-		},
-
-		notesChart(type: string): any {
-			return {
-				series: [{
-					name: 'All',
-					type: 'line',
-					data: this.format(type == 'combined'
-						? sum(this.stats.notes.local.inc, negate(this.stats.notes.local.dec), this.stats.notes.remote.inc, negate(this.stats.notes.remote.dec))
-						: sum(this.stats.notes[type].inc, negate(this.stats.notes[type].dec))
-					)
-				}, {
-					name: 'Renotes',
-					type: 'area',
-					data: this.format(type == 'combined'
-						? sum(this.stats.notes.local.diffs.renote, this.stats.notes.remote.diffs.renote)
-						: this.stats.notes[type].diffs.renote
-					)
-				}, {
-					name: 'Replies',
-					type: 'area',
-					data: this.format(type == 'combined'
-						? sum(this.stats.notes.local.diffs.reply, this.stats.notes.remote.diffs.reply)
-						: this.stats.notes[type].diffs.reply
-					)
-				}, {
-					name: 'Normal',
-					type: 'area',
-					data: this.format(type == 'combined'
-						? sum(this.stats.notes.local.diffs.normal, this.stats.notes.remote.diffs.normal)
-						: this.stats.notes[type].diffs.normal
-					)
-				}]
-			};
-		},
-
-		notesTotalChart(): any {
-			return {
-				series: [{
-					name: 'Combined',
-					type: 'line',
-					data: this.format(sum(this.stats.notes.local.total, this.stats.notes.remote.total))
-				}, {
-					name: 'Local',
-					type: 'area',
-					data: this.format(this.stats.notes.local.total)
-				}, {
-					name: 'Remote',
-					type: 'area',
-					data: this.format(this.stats.notes.remote.total)
-				}]
-			};
-		},
-
-		usersChart(total: boolean): any {
-			return {
-				series: [{
-					name: 'Combined',
-					type: 'line',
-					data: this.format(total
-						? sum(this.stats.users.local.total, this.stats.users.remote.total)
-						: sum(this.stats.users.local.inc, negate(this.stats.users.local.dec), this.stats.users.remote.inc, negate(this.stats.users.remote.dec))
-					)
-				}, {
-					name: 'Local',
-					type: 'area',
-					data: this.format(total
-						? this.stats.users.local.total
-						: sum(this.stats.users.local.inc, negate(this.stats.users.local.dec))
-					)
-				}, {
-					name: 'Remote',
-					type: 'area',
-					data: this.format(total
-						? this.stats.users.remote.total
-						: sum(this.stats.users.remote.inc, negate(this.stats.users.remote.dec))
-					)
-				}]
-			};
-		},
-
-		activeUsersChart(): any {
-			return {
-				series: [{
-					name: 'Combined',
-					type: 'line',
-					data: this.format(sum(this.stats.activeUsers.local.count, this.stats.activeUsers.remote.count))
-				}, {
-					name: 'Local',
-					type: 'area',
-					data: this.format(this.stats.activeUsers.local.count)
-				}, {
-					name: 'Remote',
-					type: 'area',
-					data: this.format(this.stats.activeUsers.remote.count)
-				}]
-			};
-		},
-
-		driveChart(): any {
-			return {
-				bytes: true,
-				series: [{
-					name: 'All',
-					type: 'line',
-					data: this.format(
-						sum(
-							this.stats.drive.local.incSize,
-							negate(this.stats.drive.local.decSize),
-							this.stats.drive.remote.incSize,
-							negate(this.stats.drive.remote.decSize)
-						)
-					)
-				}, {
-					name: 'Local +',
-					type: 'area',
-					data: this.format(this.stats.drive.local.incSize)
-				}, {
-					name: 'Local -',
-					type: 'area',
-					data: this.format(negate(this.stats.drive.local.decSize))
-				}, {
-					name: 'Remote +',
-					type: 'area',
-					data: this.format(this.stats.drive.remote.incSize)
-				}, {
-					name: 'Remote -',
-					type: 'area',
-					data: this.format(negate(this.stats.drive.remote.decSize))
-				}]
-			};
-		},
-
-		driveTotalChart(): any {
-			return {
-				bytes: true,
-				series: [{
-					name: 'Combined',
-					type: 'line',
-					data: this.format(sum(this.stats.drive.local.totalSize, this.stats.drive.remote.totalSize))
-				}, {
-					name: 'Local',
-					type: 'area',
-					data: this.format(this.stats.drive.local.totalSize)
-				}, {
-					name: 'Remote',
-					type: 'area',
-					data: this.format(this.stats.drive.remote.totalSize)
-				}]
-			};
-		},
-
-		driveFilesChart(): any {
-			return {
-				series: [{
-					name: 'All',
-					type: 'line',
-					data: this.format(
-						sum(
-							this.stats.drive.local.incCount,
-							negate(this.stats.drive.local.decCount),
-							this.stats.drive.remote.incCount,
-							negate(this.stats.drive.remote.decCount)
-						)
-					)
-				}, {
-					name: 'Local +',
-					type: 'area',
-					data: this.format(this.stats.drive.local.incCount)
-				}, {
-					name: 'Local -',
-					type: 'area',
-					data: this.format(negate(this.stats.drive.local.decCount))
-				}, {
-					name: 'Remote +',
-					type: 'area',
-					data: this.format(this.stats.drive.remote.incCount)
-				}, {
-					name: 'Remote -',
-					type: 'area',
-					data: this.format(negate(this.stats.drive.remote.decCount))
-				}]
-			};
-		},
-
-		driveFilesTotalChart(): any {
-			return {
-				series: [{
-					name: 'Combined',
-					type: 'line',
-					data: this.format(sum(this.stats.drive.local.totalCount, this.stats.drive.remote.totalCount))
-				}, {
-					name: 'Local',
-					type: 'area',
-					data: this.format(this.stats.drive.local.totalCount)
-				}, {
-					name: 'Remote',
-					type: 'area',
-					data: this.format(this.stats.drive.remote.totalCount)
-				}]
-			};
-		},
-
-		networkRequestsChart(): any {
-			return {
-				series: [{
-					name: 'Incoming',
-					data: this.format(this.stats.network.incomingRequests)
-				}]
-			};
-		},
-
-		networkTimeChart(): any {
-			const data = [];
-
-			for (let i = 0; i < limit; i++) {
-				data.push(this.stats.network.incomingRequests[i] != 0 ? (this.stats.network.totalTime[i] / this.stats.network.incomingRequests[i]) : 0);
-			}
-
-			return {
-				series: [{
-					name: 'Avg time',
-					data: this.format(data)
-				}]
-			};
-		},
-
-		networkUsageChart(): any {
-			return {
-				bytes: true,
-				series: [{
-					name: 'Incoming',
-					data: this.format(this.stats.network.incomingBytes)
-				}, {
-					name: 'Outgoing',
-					data: this.format(this.stats.network.outgoingBytes)
-				}]
-			};
-		},
+		this.chartInstance.render();
 	}
-});
+
+	public getDate(i: number) {
+		const y = this.now.getFullYear();
+		const m = this.now.getMonth();
+		const d = this.now.getDate();
+		const h = this.now.getHours();
+
+		return (
+			this.span == 'day' ? new Date(y, m, d - i) :
+			this.span == 'hour' ? new Date(y, m, d, h - i) :
+			null
+		)!;
+	}
+
+	public format(arr) {
+		return arr.map((v, i) => ({ x: this.getDate(i).getTime(), y: v }));
+	}
+
+	public federationInstancesChart(total: boolean): any {
+		return {
+			series: [{
+				name: 'Instances',
+				data: this.format(total
+					? this.stats.federation.instance.total
+					: sum(this.stats.federation.instance.inc, negate(this.stats.federation.instance.dec))
+				)
+			}]
+		};
+	}
+
+	public notesChart(type: string): any {
+		return {
+			series: [{
+				name: 'All',
+				type: 'line',
+				data: this.format(type == 'combined'
+					? sum(this.stats.notes.local.inc, negate(this.stats.notes.local.dec), this.stats.notes.remote.inc, negate(this.stats.notes.remote.dec))
+					: sum(this.stats.notes[type].inc, negate(this.stats.notes[type].dec))
+				)
+			}, {
+				name: 'Renotes',
+				type: 'area',
+				data: this.format(type == 'combined'
+					? sum(this.stats.notes.local.diffs.renote, this.stats.notes.remote.diffs.renote)
+					: this.stats.notes[type].diffs.renote
+				)
+			}, {
+				name: 'Replies',
+				type: 'area',
+				data: this.format(type == 'combined'
+					? sum(this.stats.notes.local.diffs.reply, this.stats.notes.remote.diffs.reply)
+					: this.stats.notes[type].diffs.reply
+				)
+			}, {
+				name: 'Normal',
+				type: 'area',
+				data: this.format(type == 'combined'
+					? sum(this.stats.notes.local.diffs.normal, this.stats.notes.remote.diffs.normal)
+					: this.stats.notes[type].diffs.normal
+				)
+			}]
+		};
+	}
+
+	public notesTotalChart(): any {
+		return {
+			series: [{
+				name: 'Combined',
+				type: 'line',
+				data: this.format(sum(this.stats.notes.local.total, this.stats.notes.remote.total))
+			}, {
+				name: 'Local',
+				type: 'area',
+				data: this.format(this.stats.notes.local.total)
+			}, {
+				name: 'Remote',
+				type: 'area',
+				data: this.format(this.stats.notes.remote.total)
+			}]
+		};
+	}
+
+	public usersChart(total: boolean): any {
+		return {
+			series: [{
+				name: 'Combined',
+				type: 'line',
+				data: this.format(total
+					? sum(this.stats.users.local.total, this.stats.users.remote.total)
+					: sum(this.stats.users.local.inc, negate(this.stats.users.local.dec), this.stats.users.remote.inc, negate(this.stats.users.remote.dec))
+				)
+			}, {
+				name: 'Local',
+				type: 'area',
+				data: this.format(total
+					? this.stats.users.local.total
+					: sum(this.stats.users.local.inc, negate(this.stats.users.local.dec))
+				)
+			}, {
+				name: 'Remote',
+				type: 'area',
+				data: this.format(total
+					? this.stats.users.remote.total
+					: sum(this.stats.users.remote.inc, negate(this.stats.users.remote.dec))
+				)
+			}]
+		};
+	}
+
+	public activeUsersChart(): any {
+		return {
+			series: [{
+				name: 'Combined',
+				type: 'line',
+				data: this.format(sum(this.stats.activeUsers.local.count, this.stats.activeUsers.remote.count))
+			}, {
+				name: 'Local',
+				type: 'area',
+				data: this.format(this.stats.activeUsers.local.count)
+			}, {
+				name: 'Remote',
+				type: 'area',
+				data: this.format(this.stats.activeUsers.remote.count)
+			}]
+		};
+	}
+
+	public driveChart(): any {
+		return {
+			bytes: true,
+			series: [{
+				name: 'All',
+				type: 'line',
+				data: this.format(
+					sum(
+						this.stats.drive.local.incSize,
+						negate(this.stats.drive.local.decSize),
+						this.stats.drive.remote.incSize,
+						negate(this.stats.drive.remote.decSize)
+					)
+				)
+			}, {
+				name: 'Local +',
+				type: 'area',
+				data: this.format(this.stats.drive.local.incSize)
+			}, {
+				name: 'Local -',
+				type: 'area',
+				data: this.format(negate(this.stats.drive.local.decSize))
+			}, {
+				name: 'Remote +',
+				type: 'area',
+				data: this.format(this.stats.drive.remote.incSize)
+			}, {
+				name: 'Remote -',
+				type: 'area',
+				data: this.format(negate(this.stats.drive.remote.decSize))
+			}]
+		};
+	}
+
+	public driveTotalChart(): any {
+		return {
+			bytes: true,
+			series: [{
+				name: 'Combined',
+				type: 'line',
+				data: this.format(sum(this.stats.drive.local.totalSize, this.stats.drive.remote.totalSize))
+			}, {
+				name: 'Local',
+				type: 'area',
+				data: this.format(this.stats.drive.local.totalSize)
+			}, {
+				name: 'Remote',
+				type: 'area',
+				data: this.format(this.stats.drive.remote.totalSize)
+			}]
+		};
+	}
+
+	public driveFilesChart(): any {
+		return {
+			series: [{
+				name: 'All',
+				type: 'line',
+				data: this.format(
+					sum(
+						this.stats.drive.local.incCount,
+						negate(this.stats.drive.local.decCount),
+						this.stats.drive.remote.incCount,
+						negate(this.stats.drive.remote.decCount)
+					)
+				)
+			}, {
+				name: 'Local +',
+				type: 'area',
+				data: this.format(this.stats.drive.local.incCount)
+			}, {
+				name: 'Local -',
+				type: 'area',
+				data: this.format(negate(this.stats.drive.local.decCount))
+			}, {
+				name: 'Remote +',
+				type: 'area',
+				data: this.format(this.stats.drive.remote.incCount)
+			}, {
+				name: 'Remote -',
+				type: 'area',
+				data: this.format(negate(this.stats.drive.remote.decCount))
+			}]
+		};
+	}
+
+	public driveFilesTotalChart(): any {
+		return {
+			series: [{
+				name: 'Combined',
+				type: 'line',
+				data: this.format(sum(this.stats.drive.local.totalCount, this.stats.drive.remote.totalCount))
+			}, {
+				name: 'Local',
+				type: 'area',
+				data: this.format(this.stats.drive.local.totalCount)
+			}, {
+				name: 'Remote',
+				type: 'area',
+				data: this.format(this.stats.drive.remote.totalCount)
+			}]
+		};
+	}
+
+	public networkRequestsChart(): any {
+		return {
+			series: [{
+				name: 'Incoming',
+				data: this.format(this.stats.network.incomingRequests)
+			}]
+		};
+	}
+
+	public networkTimeChart(): any {
+		const data = [] as number[];
+
+		for (let i = 0; i < limit; i++) {
+			data.push(this.stats.network.incomingRequests[i] != 0 ? (this.stats.network.totalTime[i] / this.stats.network.incomingRequests[i]) : 0);
+		}
+
+		return {
+			series: [{
+				name: 'Avg time',
+				data: this.format(data)
+			}]
+		};
+	}
+
+	public networkUsageChart(): any {
+		return {
+			bytes: true,
+			series: [{
+				name: 'Incoming',
+				data: this.format(this.stats.network.incomingBytes)
+			}, {
+				name: 'Outgoing',
+				data: this.format(this.stats.network.outgoingBytes)
+			}]
+		};
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

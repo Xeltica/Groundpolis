@@ -26,53 +26,50 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import { AbuseUserReport } from '../../../../models/entities/abuse-user-report';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('admin/views/abuse.vue'),
+})
+export default class Abuse extends Vue {
 
-	data() {
-		return {
-			limit: 10,
-			untilId: undefined,
-			userReports: [],
-			existMore: false,
-			faExclamationCircle
-		};
-	},
+	private limit = 10;
+	private untilId = '';
+	private userReports = [] as AbuseUserReport[];
+	private existMore = false;
+	private faExclamationCircle = faExclamationCircle;
 
-	mounted() {
+	public mounted() {
 		this.fetchUserReports();
-	},
-
-	methods: {
-		fetchUserReports() {
-			this.$root.api('admin/abuse-user-reports', {
-				untilId: this.untilId,
-				limit: this.limit + 1
-			}).then(reports => {
-				if (reports.length == this.limit + 1) {
-					reports.pop();
-					this.existMore = true;
-				} else {
-					this.existMore = false;
-				}
-				this.userReports = this.userReports.concat(reports);
-				this.untilId = this.userReports[this.userReports.length - 1].id;
-			});
-		},
-
-		removeReport(report) {
-			this.$root.api('admin/remove-abuse-user-report', {
-				reportId: report.id
-			}).then(() => {
-				this.userReports = this.userReports.filter(r => r.id != report.id);
-			});
-		}
 	}
-});
+
+	public async fetchUserReports() {
+		const reports = await this.$root.api('admin/abuse-user-reports', {
+			untilId: this.untilId,
+			limit: this.limit + 1
+		}) as AbuseUserReport[];
+
+		if (reports.length == this.limit + 1) {
+			reports.pop();
+			this.existMore = true;
+		} else {
+			this.existMore = false;
+		}
+		this.userReports = this.userReports.concat(reports);
+		this.untilId = this.userReports[this.userReports.length - 1].id;
+	}
+
+	public removeReport(report: AbuseUserReport) {
+		this.$root.api('admin/remove-abuse-user-report', {
+			reportId: report.id
+		}).then(() => {
+			this.userReports = this.userReports.filter(r => r.id != report.id);
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

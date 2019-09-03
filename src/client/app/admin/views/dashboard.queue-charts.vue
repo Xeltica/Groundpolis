@@ -18,51 +18,46 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import { faInbox } from '@fortawesome/free-solid-svg-icons';
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import ApexCharts from 'apexcharts';
 
 const limit = 150;
 
-export default Vue.extend({
-	data() {
-		return {
-			stats: [],
-			inChart: null,
-			outChart: null,
-			faInbox, faPaperPlane
-		};
-	},
+@Component
+export default class DashboardQueueCharts extends Vue {
+	private stats: any[];
+	private inChart: ApexCharts;
+	private outChart: ApexCharts;
+	private faInbox = faInbox;
+	private faPaperPlane = faPaperPlane;
 
-	computed: {
-		latestStats(): any {
-			return this.stats[this.stats.length - 1];
-		}
-	},
+	public get latestStats(): any {
+		return this.stats[this.stats.length - 1];
+	}
 
-	watch: {
-		stats(stats) {
-			this.inChart.updateSeries([{
-				data: stats.map((x, i) => ({ x: i, y: x.inbox.activeSincePrevTick }))
-			}, {
-				data: stats.map((x, i) => ({ x: i, y: x.inbox.active }))
-			}, {
-				data: stats.map((x, i) => ({ x: i, y: x.inbox.waiting }))
-			}, {
-				data: stats.map((x, i) => ({ x: i, y: x.inbox.delayed }))
-			}]);
-			this.outChart.updateSeries([{
-				data: stats.map((x, i) => ({ x: i, y: x.deliver.activeSincePrevTick }))
-			}, {
-				data: stats.map((x, i) => ({ x: i, y: x.deliver.active }))
-			}, {
-				data: stats.map((x, i) => ({ x: i, y: x.deliver.waiting }))
-			}, {
-				data: stats.map((x, i) => ({ x: i, y: x.deliver.delayed }))
-			}]);
-		}
-	},
+	@Watch('stats')
+	public watchStats(stats) {
+		this.inChart.updateSeries([{
+			data: stats.map((x, i) => ({ x: i, y: x.inbox.activeSincePrevTick })), name: ''
+		}, {
+			data: stats.map((x, i) => ({ x: i, y: x.inbox.active })), name: ''
+		}, {
+			data: stats.map((x, i) => ({ x: i, y: x.inbox.waiting })), name: ''
+		}, {
+			data: stats.map((x, i) => ({ x: i, y: x.inbox.delayed })), name: ''
+		}]);
+		this.outChart.updateSeries([{
+			data: stats.map((x, i) => ({ x: i, y: x.deliver.activeSincePrevTick })), name: ''
+		}, {
+			data: stats.map((x, i) => ({ x: i, y: x.deliver.active })), name: ''
+		}, {
+			data: stats.map((x, i) => ({ x: i, y: x.deliver.waiting })), name: ''
+		}, {
+			data: stats.map((x, i) => ({ x: i, y: x.deliver.delayed })), name: ''
+		}]);
+	}
 
 	mounted() {
 		const chartOpts = {
@@ -148,7 +143,7 @@ export default Vue.extend({
 			}
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

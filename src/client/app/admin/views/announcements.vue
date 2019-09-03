@@ -25,67 +25,64 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faBroadcastTower, faPlus } from '@fortawesome/free-solid-svg-icons';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('admin/views/announcements.vue'),
-	data() {
-		return {
-			announcements: [],
-			faBroadcastTower, faPlus
-		};
-	},
+})
+export default class Announcements extends Vue {
+	private announcements = [] as any[];
+	private readonly faBroadcastTower = faBroadcastTower;
+	private readonly faPlus = faPlus;
 
-	created() {
+	public created() {
 		this.$root.getMeta().then(meta => {
 			this.announcements = meta.announcements;
 		});
-	},
+	}
 
-	methods: {
-		add() {
-			this.announcements.unshift({
-				title: '',
-				text: '',
-				image: null
-			});
-		},
+	public add() {
+		this.announcements.unshift({
+			title: '',
+			text: '',
+			image: null
+		});
+	}
 
-		remove(i) {
+	public remove(i) {
+		this.$root.dialog({
+			type: 'warning',
+			text: this.$t('_remove.are-you-sure').replace('$1', this.announcements.find((_, j) => j == i).title),
+			showCancelButton: true
+		}).then(({ canceled }) => {
+			if (canceled) return;
+			this.announcements = this.announcements.filter((_, j) => j !== i);
+			this.save(true);
 			this.$root.dialog({
-				type: 'warning',
-				text: this.$t('_remove.are-you-sure').replace('$1', this.announcements.find((_, j) => j == i).title),
-				showCancelButton: true
-			}).then(({ canceled }) => {
-				if (canceled) return;
-				this.announcements = this.announcements.filter((_, j) => j !== i);
-				this.save(true);
+				type: 'success',
+				text: this.$t('_remove.removed')
+			});
+		});
+	}
+
+	public save(silent) {
+		this.$root.api('admin/update-meta', {
+			announcements: this.announcements
+		}).then(() => {
+			if (!silent) {
 				this.$root.dialog({
 					type: 'success',
-					text: this.$t('_remove.removed')
+					text: this.$t('saved')
 				});
+			}
+		}).catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e
 			});
-		},
-
-		save(silent) {
-			this.$root.api('admin/update-meta', {
-				announcements: this.announcements
-			}).then(() => {
-				if (!silent) {
-					this.$root.dialog({
-						type: 'success',
-						text: this.$t('saved')
-					});
-				}
-			}).catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e
-				});
-			});
-		}
+		});
 	}
-});
+}
 </script>

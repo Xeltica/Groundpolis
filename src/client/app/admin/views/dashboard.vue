@@ -88,17 +88,18 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
-import XCpuMemory from "./dashboard.cpu-memory.vue";
-import XQueue from "./dashboard.queue-charts.vue";
-import XCharts from "./dashboard.charts.vue";
-import XApLog from "./dashboard.ap-log.vue";
+import XCpuMemory from './dashboard.cpu-memory.vue';
+import XQueue from './dashboard.queue-charts.vue';
+import XCharts from './dashboard.charts.vue';
+import XApLog from './dashboard.ap-log.vue';
 import { faDatabase } from '@fortawesome/free-solid-svg-icons';
 import MarqueeText from 'vue-marquee-text-component';
 import randomColor from 'randomcolor';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('admin/views/dashboard.vue'),
 
 	components: {
@@ -159,7 +160,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

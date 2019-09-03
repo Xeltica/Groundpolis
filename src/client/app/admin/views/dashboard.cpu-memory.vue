@@ -18,35 +18,33 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import ApexCharts from 'apexcharts';
+import { Connection } from '../../common/scripts/Connection';
+import { Meta } from '../../../../models/entities/meta';
 
-export default Vue.extend({
-	props: ['connection'],
+@Component
+export default class DashboardCpuMemory extends Vue {
+	@Prop() private connection: Connection;
 
-	data() {
-		return {
-			stats: [],
-			cpuChart: null,
-			memChart: null,
-			cpuP: '',
-			memP: '',
-			meta: null
-		};
-	},
+	private stats = [] as any[];
+	private cpuChart: ApexCharts;
+	private memChart: ApexCharts;
+	private cpuP = '';
+	private memP = '';
+	private meta: Meta;
 
-	watch: {
-		stats(stats) {
-			this.cpuChart.updateSeries([{
-				data: stats.map((x, i) => ({ x: i, y: x.cpu_usage }))
-			}]);
-			this.memChart.updateSeries([{
-				data: stats.map((x, i) => ({ x: i, y: (x.mem.used / x.mem.total) }))
-			}]);
-		}
-	},
+	@Watch('stats')
+	public watchStats(stats: any[]) {
+		this.cpuChart.updateSeries([{
+			data: stats.map((x, i) => ({ x: i, y: x.cpu_usage })), name: '',
+		}]);
+		this.memChart.updateSeries([{
+			data: stats.map((x, i) => ({ x: i, y: (x.mem.used / x.mem.total) })), name: '',
+		}]);
+	}
 
-	mounted() {
+	public mounted() {
 		this.$root.getMeta().then(meta => {
 			this.meta = meta;
 		});
@@ -112,32 +110,30 @@ export default Vue.extend({
 
 		this.cpuChart.render();
 		this.memChart.render();
-	},
+	}
 
-	beforeDestroy() {
+	public beforeDestroy() {
 		this.connection.off('stats', this.onStats);
 		this.connection.off('statsLog', this.onStatsLog);
 
 		this.cpuChart.destroy();
 		this.memChart.destroy();
-	},
+	}
 
-	methods: {
-		onStats(stats) {
-			this.stats.push(stats);
-			if (this.stats.length > 200) this.stats.shift();
+	public onStats(stats) {
+		this.stats.push(stats);
+		if (this.stats.length > 200) this.stats.shift();
 
-			this.cpuP = (stats.cpu_usage * 100).toFixed(0);
-			this.memP = (stats.mem.used / stats.mem.total * 100).toFixed(0);
-		},
+		this.cpuP = (stats.cpu_usage * 100).toFixed(0);
+		this.memP = (stats.mem.used / stats.mem.total * 100).toFixed(0);
+	}
 
-		onStatsLog(statsLog) {
-			for (const stats of statsLog.reverse()) {
-				this.onStats(stats);
-			}
+	public onStatsLog(statsLog) {
+		for (const stats of statsLog.reverse()) {
+			this.onStats(stats);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

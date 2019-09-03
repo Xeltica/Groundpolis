@@ -22,46 +22,43 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { faBolt, faExchangeAlt } from '@fortawesome/free-solid-svg-icons';
+import { Connection } from '../../common/scripts/Connection';
 
-export default Vue.extend({
-	data() {
-		return {
-			logs: [],
-			connection: null,
-			faBolt, faExchangeAlt
-		};
-	},
+@Component
+export default class DashboardApLog extends Vue {
+	private logs = [] as any[];
+	private connection = null as Connection | null;
+	private faBolt = faBolt;
+	private faExchangeAlt = faExchangeAlt;
 
-	mounted() {
-		this.connection = this.$root.stream.useSharedConnection('apLog');
+	public mounted() {
+		this.connection = this.$root.stream.useSharedConnection('apLog') as Connection;
 		this.connection.on('log', this.onLog);
 		this.connection.on('logs', this.onLogs);
 		this.connection.send('requestLog', {
 			id: Math.random().toString().substr(2, 8),
 			length: 50
 		});
-	},
+	}
 
-	beforeDestroy() {
-		this.connection.dispose();
-	},
+	public beforeDestroy() {
+		if (this.connection) this.connection.dispose();
+	}
 
-	methods: {
-		onLog(log) {
-			log.id = Math.random();
-			this.logs.unshift(log);
-			if (this.logs.length > 50) this.logs.pop();
-		},
+	public onLog(log) {
+		log.id = Math.random();
+		this.logs.unshift(log);
+		if (this.logs.length > 50) this.logs.pop();
+	}
 
-		onLogs(logs) {
-			for (const log of logs.reverse()) {
-				this.onLog(log)
-			}
+	public onLogs(logs) {
+		for (const log of logs.reverse()) {
+			this.onLog(log);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

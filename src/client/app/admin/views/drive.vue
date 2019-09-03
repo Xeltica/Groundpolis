@@ -39,7 +39,7 @@
 				</ui-select>
 			</ui-horizon-group>
 			<sequential-entrance animation="entranceFromTop" delay="25">
-				<div class="kidvdlkg" v-for="file in files">
+				<div class="kidvdlkg" v-for="file in files" :key="file.id">
 					<div @click="file._open = !file._open">
 						<div>
 							<x-file-thumbnail class="thumbnail" :file="file" fit="contain" @click="showFileMenu(file)"/>
@@ -75,187 +75,188 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faCloud, faTerminal, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { faTrashAlt, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import XFileThumbnail from '../../common/views/components/drive-file-thumbnail.vue';
+import { DriveFile } from '../../../../models/entities/drive-file';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('admin/views/drive.vue'),
-
 	components: {
 		XFileThumbnail
 	},
+})
+export default class Vm extends Vue {
 
-	data() {
-		return {
-			file: null,
-			target: null,
-			sort: '+createdAt',
-			origin: 'combined',
-			limit: 10,
-			offset: 0,
-			files: [],
-			existMore: false,
-			faCloud, faTrashAlt, faEye, faEyeSlash, faTerminal, faSearch
-		};
-	},
+	private file: DriveFile;
+	private target = '';
+	private sort = '+createdAt';
+	private origin = 'combined';
+	private limit = 10;
+	private offset = 0;
+	private files: DriveFile[];
+	private existMore = false;
+	private faCloud = faCloud;
+	private faTrashAlt = faTrashAlt;
+	private faEye = faEye;
+	private faEyeSlash = faEyeSlash;
+	private faTerminal = faTerminal;
+	private faSearch = faSearch;
 
-	watch: {
-		sort() {
-			this.files = [];
-			this.offset = 0;
-			this.fetch();
-		},
-
-		origin() {
-			this.files = [];
-			this.offset = 0;
-			this.fetch();
-		}
-	},
-
-	mounted() {
+	@Watch('sort')
+	public watchSort() {
+		this.files = [];
+		this.offset = 0;
 		this.fetch();
-	},
+	}
 
-	methods: {
-		async fetchFile() {
-			try {
-				return await this.$root.api('drive/files/show', this.target.startsWith('http') ? { url: this.target } : { fileId: this.target });
-			} catch (e) {
-				if (e == 'file-not-found') {
-					this.$root.dialog({
-						type: 'error',
-						text: this.$t('file-not-found')
-					});
-				} else {
-					this.$root.dialog({
-						type: 'error',
-						text: e.message
-					});
-				}
+	@Watch('origin')
+	public watchOrigin() {
+		this.files = [];
+		this.offset = 0;
+		this.fetch();
+	}
+
+	public mounted() {
+		this.fetch();
+	}
+
+	public async fetchFile() {
+		try {
+			return await this.$root.api('drive/files/show', this.target.startsWith('http') ? { url: this.target } : { fileId: this.target });
+		} catch (e) {
+			if (e == 'file-not-found') {
+				this.$root.dialog({
+					type: 'error',
+					text: this.$t('file-not-found')
+				});
+			} else {
+				this.$root.dialog({
+					type: 'error',
+					text: e.message
+				});
 			}
-		},
+		}
+	}
 
-		fetch() {
-			this.$root.api('admin/drive/files', {
-				origin: this.origin,
-				sort: this.sort,
-				offset: this.offset,
-				limit: this.limit + 1
-			}).then(files => {
-				if (files.length == this.limit + 1) {
-					files.pop();
-					this.existMore = true;
-				} else {
-					this.existMore = false;
-				}
-				for (const x of files) {
-					x._open = false;
-				}
-				this.files = this.files.concat(files);
-				this.offset += this.limit;
-			});
-		},
+	public fetch() {
+		this.$root.api('admin/drive/files', {
+			origin: this.origin,
+			sort: this.sort,
+			offset: this.offset,
+			limit: this.limit + 1
+		}).then(files => {
+			if (files.length == this.limit + 1) {
+				files.pop();
+				this.existMore = true;
+			} else {
+				this.existMore = false;
+			}
+			for (const x of files) {
+				x._open = false;
+			}
+			this.files = this.files.concat(files);
+			this.offset += this.limit;
+		});
+	}
 
-		async del(file: any) {
-			const process = async () => {
-				await this.$root.api('drive/files/delete', { fileId: file.id });
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('deleted')
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-		},
-
-		toggleSensitive(file: any) {
-			this.$root.api('drive/files/update', {
-				fileId: file.id,
-				isSensitive: !file.isSensitive
-			}).then(() => {
-				file.isSensitive = !file.isSensitive;
-			});
-		},
-
-		async show() {
-			const file = await this.fetchFile();
-			this.$root.api('admin/drive/show-file', { fileId: file.id }).then(info => {
-				this.file = info;
-			});
-		},
-
-		async findAndToggleSensitive(sensitive) {
-			const process = async () => {
-				const file = await this.fetchFile();
-				await this.$root.api('drive/files/update', {
-					fileId: file.id,
-					isSensitive: sensitive
-				});
-				this.$root.dialog({
-					type: 'success',
-					text: sensitive ? this.$t('marked-as-sensitive') : this.$t('unmarked-as-sensitive')
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-		},
-
-		async findAndDel() {
-			const process = async () => {
-				const file = await this.fetchFile();
-				await this.$root.api('drive/files/delete', { fileId: file.id });
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('deleted')
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-		},
-
-		cleanRemoteFiles() {
+	public async del(file: any) {
+		const process = async () => {
+			await this.$root.api('drive/files/delete', { fileId: file.id });
 			this.$root.dialog({
-				type: 'warning',
-				text: this.$t('clean-remote-files-are-you-sure'),
-				showCancelButton: true
-			}).then(({ canceled }) => {
-				if (canceled) return;
-				this.$root.api('admin/drive/clean-remote-files');
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
+				type: 'success',
+				text: this.$t('deleted')
 			});
-		},
+		};
 
-		cleanUp() {
-			this.$root.api('admin/drive/cleanup');
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+	}
+
+	public toggleSensitive(file: any) {
+		this.$root.api('drive/files/update', {
+			fileId: file.id,
+			isSensitive: !file.isSensitive
+		}).then(() => {
+			file.isSensitive = !file.isSensitive;
+		});
+	}
+
+	public async show() {
+		const file = await this.fetchFile();
+		this.$root.api('admin/drive/show-file', { fileId: file.id }).then(info => {
+			this.file = info;
+		});
+	}
+
+	public async findAndToggleSensitive(sensitive) {
+		const process = async () => {
+			const file = await this.fetchFile();
+			await this.$root.api('drive/files/update', {
+				fileId: file.id,
+				isSensitive: sensitive
+			});
+			this.$root.dialog({
+				type: 'success',
+				text: sensitive ? this.$t('marked-as-sensitive') : this.$t('unmarked-as-sensitive')
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+	}
+
+	public async findAndDel() {
+		const process = async () => {
+			const file = await this.fetchFile();
+			await this.$root.api('drive/files/delete', { fileId: file.id });
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('deleted')
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+	}
+
+	public cleanRemoteFiles() {
+		this.$root.dialog({
+			type: 'warning',
+			text: this.$t('clean-remote-files-are-you-sure'),
+			showCancelButton: true
+		}).then(({ canceled }) => {
+			if (canceled) return;
+			this.$root.api('admin/drive/clean-remote-files');
 			this.$root.dialog({
 				type: 'success',
 				splash: true
 			});
-		}
+		});
 	}
-});
+
+	public cleanUp() {
+		this.$root.api('admin/drive/cleanup');
+		this.$root.dialog({
+			type: 'success',
+			splash: true
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>
