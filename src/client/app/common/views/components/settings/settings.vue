@@ -333,7 +333,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import X2fa from './2fa.vue';
 import XApps from './apps.vue';

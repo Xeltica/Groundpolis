@@ -65,13 +65,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { faTasks, faInbox, faDatabase, faCloud } from '@fortawesome/free-solid-svg-icons';
 import { faPaperPlane, faChartBar } from '@fortawesome/free-regular-svg-icons';
 import i18n from '../../i18n';
 import XChart from './queue.chart.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('admin/views/queue.vue'),
 
 	components: {
@@ -144,7 +145,7 @@ export default Vue.extend({
 			});
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

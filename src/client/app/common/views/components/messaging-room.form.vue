@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import * as autosize from 'autosize';
 import { formatTimeString } from '../../../../../misc/format-time-string';

@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import { faListUl, faPlus } from '@fortawesome/free-solid-svg-icons';
 import XAvatars from '../../views/components/avatars.vue';

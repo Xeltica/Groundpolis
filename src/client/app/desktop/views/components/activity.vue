@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import XCalendar from './activity.calendar.vue';
 import XChart from './activity.chart.vue';

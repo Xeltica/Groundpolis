@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import getNoteSummary from '../../../../../misc/get-note-summary';
 
 export default Vue.extend({

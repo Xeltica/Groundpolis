@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { faStickyNote } from '@fortawesome/free-regular-svg-icons';
 import XPage from '../components/page/page.vue';
 

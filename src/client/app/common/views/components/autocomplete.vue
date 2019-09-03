@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import * as emojilib from 'emojilib';
 import contains from '../../../common/scripts/contains';
 import { twemojiBase } from '../../../../../misc/twemoji-base';

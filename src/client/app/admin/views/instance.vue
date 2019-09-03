@@ -243,14 +243,15 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { url, host } from '../../config';
 import { toUnicode } from 'punycode';
 import { faHeadset, faShieldAlt, faGhost, faUserPlus, faBolt, faThumbtack, faPencilAlt, faHashtag } from '@fortawesome/free-solid-svg-icons';
 import { faEnvelope as farEnvelope, faSave } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('admin/views/instance.vue'),
 
 	data() {
@@ -515,5 +516,5 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>

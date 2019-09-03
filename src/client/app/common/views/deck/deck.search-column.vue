@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import XColumn from './deck.column.vue';
 import XNotes from './deck.notes.vue';
 import { genSearchQuery } from '../../../common/scripts/gen-search-query';

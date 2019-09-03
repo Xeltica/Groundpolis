@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import { gcd } from '../../../../../prelude/math';
 import { appendQuery } from '../../../../../prelude/url';

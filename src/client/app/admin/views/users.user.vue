@@ -26,12 +26,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons';
 import { faSnowflake } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('admin/views/users.vue'),
 	props: ['user', 'click'],
 	data() {
@@ -39,7 +40,7 @@ export default Vue.extend({
 			faSnowflake, faMicrophoneSlash
 		};
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

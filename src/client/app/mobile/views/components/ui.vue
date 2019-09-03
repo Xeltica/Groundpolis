@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import MkNotify from './notify.vue';
 import XHeader from './ui.header.vue';
 import XNav from './ui.nav.vue';

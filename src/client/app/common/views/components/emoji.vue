@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 // スクリプトサイズがデカい
 //import { lib } from 'emojilib';
 import { getStaticImageUrl } from '../../../common/scripts/get-static-image-url';

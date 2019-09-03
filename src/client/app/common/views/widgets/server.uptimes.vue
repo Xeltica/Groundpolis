@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import formatUptime from '../../scripts/format-uptime';
 
 export default Vue.extend({

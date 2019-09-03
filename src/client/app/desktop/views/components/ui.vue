@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import XHeader from './ui.header.vue';
 import XSidebar from './ui.sidebar.vue';
 

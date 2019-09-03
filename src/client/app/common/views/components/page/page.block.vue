@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import XText from './page.text.vue';
 import XSection from './page.section.vue';
 import XImage from './page.image.vue';

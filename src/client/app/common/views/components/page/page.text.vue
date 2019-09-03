@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { parse } from '../../../../../../mfm/parse';
 import { unique } from '../../../../../../prelude/array';
 

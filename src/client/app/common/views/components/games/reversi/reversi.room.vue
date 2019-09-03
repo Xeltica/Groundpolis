@@ -114,7 +114,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../../i18n';
 import * as maps from '../../../../../../../games/reversi/maps';
 import { faCircle as fasCircle } from '@fortawesome/free-solid-svg-icons';

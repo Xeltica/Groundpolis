@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import XTlColumn from './deck.tl-column.vue';
 import XNotificationsColumn from './deck.notifications-column.vue';
 import XWidgetsColumn from './deck.widgets-column.vue';

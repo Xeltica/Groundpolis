@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import anime from 'animejs';
 import contains from '../../../common/scripts/contains';
 import XMenu from './context-menu.menu.vue';

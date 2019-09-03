@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import Icon from './reaction-icon.vue';
 import anime from 'animejs';
 import XDetails from './reactions-viewer.details.vue';

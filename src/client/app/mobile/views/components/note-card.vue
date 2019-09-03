@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import summary from '../../../../../misc/get-note-summary';
 import { getStaticImageUrl } from '../../../common/scripts/get-static-image-url';
 

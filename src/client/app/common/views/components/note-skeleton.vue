@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import VueContentLoading from 'vue-content-loading';
 import * as tinycolor from 'tinycolor2';
 

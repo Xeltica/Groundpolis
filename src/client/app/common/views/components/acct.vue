@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { host } from '../../../config';
 import { toUnicode } from 'punycode';
 export default Vue.extend({

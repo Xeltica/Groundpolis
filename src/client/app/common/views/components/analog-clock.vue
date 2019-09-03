@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import * as tinycolor from 'tinycolor2';
 
 export default Vue.extend({

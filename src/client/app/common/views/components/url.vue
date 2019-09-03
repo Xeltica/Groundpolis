@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { toUnicode as decodePunycode } from 'punycode';
 import { url as local } from '../../../config';
 

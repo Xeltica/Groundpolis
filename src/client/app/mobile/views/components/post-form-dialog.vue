@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import anime from 'animejs';
 import XPostForm from './post-form.vue';
 

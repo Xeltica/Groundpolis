@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { faStickyNote } from '@fortawesome/free-regular-svg-icons';
 import i18n from '../../../i18n';
 import XColumn from './deck.column.vue';

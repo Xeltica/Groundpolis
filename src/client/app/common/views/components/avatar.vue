@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import { getStaticImageUrl } from '../../../common/scripts/get-static-image-url';
 import ImageViewer from './image-viewer.vue';
 

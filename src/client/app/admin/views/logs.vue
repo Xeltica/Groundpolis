@@ -34,12 +34,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faStream } from '@fortawesome/free-solid-svg-icons';
 import VueJsonPretty from 'vue-json-pretty';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('admin/views/logs.vue'),
 
 	components: {
@@ -91,7 +92,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

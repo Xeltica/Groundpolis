@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import XReaction from './reactions-viewer.reaction.vue';
 
 export default Vue.extend({

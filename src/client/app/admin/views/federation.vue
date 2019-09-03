@@ -159,7 +159,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { faTrashAlt, faBan, faGlobe, faTerminal, faSearch, faMinusCircle, faServer, faCrosshairs, faEnvelopeOpenText, faUsers, faCaretDown, faCaretUp, faTrafficLight, faInbox } from '@fortawesome/free-solid-svg-icons';
@@ -170,7 +170,8 @@ const chartLimit = 90;
 const sum = (...arr) => arr.reduce((r, a) => r.map((b, i) => a[i] + b));
 const negate = arr => arr.map(x => -x);
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('admin/views/federation.vue'),
 
 	filters: {
@@ -523,7 +524,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>
