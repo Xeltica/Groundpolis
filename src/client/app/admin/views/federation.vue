@@ -132,7 +132,7 @@
 					<span>{{ $t('followers') }}</span>
 					<span>{{ $t('status') }}</span>
 				</header>
-				<div v-for="instance in instances" :style="{ opacity: instance.isNotResponding ? 0.5 : 1 }">
+				<div v-for="instance in instances" :key="instance.host" :style="{ opacity: instance.isNotResponding ? 0.5 : 1 }">
 					<a @click.prevent="showInstance(instance.host)" rel="nofollow noopener" target="_blank" :href="`https://${instance.host}`" :style="{ textDecoration: instance.isMarkedAsClosed ? 'line-through' : 'none' }">{{ instance.host }}</a>
 					<span>{{ instance.notesCount | number }}</span>
 					<span>{{ instance.usersCount | number }}</span>
@@ -159,370 +159,380 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { faTrashAlt, faBan, faGlobe, faTerminal, faSearch, faMinusCircle, faServer, faCrosshairs, faEnvelopeOpenText, faUsers, faCaretDown, faCaretUp, faTrafficLight, faInbox } from '@fortawesome/free-solid-svg-icons';
 import ApexCharts from 'apexcharts';
 import * as tinycolor from 'tinycolor2';
+import { Instance } from '../../../../models/entities/instance';
 
 const chartLimit = 90;
 const sum = (...arr) => arr.reduce((r, a) => r.map((b, i) => a[i] + b));
 const negate = arr => arr.map(x => -x);
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/federation.vue'),
 
 	filters: {
 		date: v => v ? new Date(v).toLocaleString() : 'N/A'
 	},
+})
+export default class Vm extends Vue {
 
-	data() {
-		return {
-			instance: null,
-			target: null,
-			sort: '+lastCommunicatedAt',
-			state: 'all',
-			limit: 100,
-			instances: [],
-			chart: null,
-			chartSrc: 'requests',
-			chartSpan: 'hour',
-			chartInstance: null,
-			blockedHosts: '',
-			faTrashAlt, faBan, faGlobe, faTerminal, faSearch, faMinusCircle, faServer, faCrosshairs, faEnvelopeOpenText, faUsers, faCaretDown, faCaretUp, faPaperPlane, faTrafficLight, faInbox
+	private instance: Instance;
+	private target: string;
+	private sort = '+lastCommunicatedAt';
+	private state = 'all';
+	private limit = 100;
+	private instances: Instance[];
+	private chart: any;
+	private chartSrc = 'requests';
+	private chartSpan = 'hour';
+	private chartInstance: ApexCharts;
+	private blockedHosts = '';
+	private faTrashAlt = faTrashAlt;
+	private faBan = faBan;
+	private faGlobe = faGlobe;
+	private faTerminal = faTerminal;
+	private faSearch = faSearch;
+	private faMinusCircle = faMinusCircle;
+	private faServer = faServer;
+	private faCrosshairs = faCrosshairs;
+	private faEnvelopeOpenText = faEnvelopeOpenText;
+	private faUsers = faUsers;
+	private faCaretDown = faCaretDown;
+	private faCaretUp = faCaretUp;
+	private faPaperPlane = faPaperPlane;
+	private faTrafficLight = faTrafficLight;
+	private faInbox = faInbox;
+	private now = new Date();
+
+	public get data(): any {
+		if (this.chart == null) return null;
+		switch (this.chartSrc) {
+			case 'requests': return this.requestsChart();
+			case 'users': return this.usersChart(false);
+			case 'users-total': return this.usersChart(true);
+			case 'notes': return this.notesChart(false);
+			case 'notes-total': return this.notesChart(true);
+			case 'ff': return this.ffChart(false);
+			case 'ff-total': return this.ffChart(true);
+			case 'drive-usage': return this.driveUsageChart(false);
+			case 'drive-usage-total': return this.driveUsageChart(true);
+			case 'drive-files': return this.driveFilesChart(false);
+			case 'drive-files-total': return this.driveFilesChart(true);
+		}
+	}
+
+	public get stats(): any[] {
+		const stats =
+			this.chartSpan == 'day' ? this.chart.perDay :
+			this.chartSpan == 'hour' ? this.chart.perHour :
+			null;
+
+		return stats;
+	}
+
+	@Watch('sort')
+	public watchSort() {
+		this.fetchInstances();
+	}
+
+	@Watch('state')
+	public watchState() {
+		this.fetchInstances();
+	}
+
+	@Watch('instance')
+	public async watchInstance() {
+		this.now = new Date();
+
+		const [perHour, perDay] = await Promise.all([
+			this.$root.api('charts/instance', { host: this.instance.host, limit: chartLimit, span: 'hour' }),
+			this.$root.api('charts/instance', { host: this.instance.host, limit: chartLimit, span: 'day' }),
+		]);
+
+		const chart = {
+			perHour: perHour,
+			perDay: perDay
 		};
-	},
 
-	computed: {
-		data(): any {
-			if (this.chart == null) return null;
-			switch (this.chartSrc) {
-				case 'requests': return this.requestsChart();
-				case 'users': return this.usersChart(false);
-				case 'users-total': return this.usersChart(true);
-				case 'notes': return this.notesChart(false);
-				case 'notes-total': return this.notesChart(true);
-				case 'ff': return this.ffChart(false);
-				case 'ff-total': return this.ffChart(true);
-				case 'drive-usage': return this.driveUsageChart(false);
-				case 'drive-usage-total': return this.driveUsageChart(true);
-				case 'drive-files': return this.driveFilesChart(false);
-				case 'drive-files-total': return this.driveFilesChart(true);
-			}
-		},
+		this.chart = chart;
 
-		stats(): any[] {
-			const stats =
-				this.chartSpan == 'day' ? this.chart.perDay :
-				this.chartSpan == 'hour' ? this.chart.perHour :
-				null;
+		this.renderChart();
+	}
 
-			return stats;
-		}
-	},
+	@Watch('chartSrc')
+	public watchChartSrc() {
+		this.renderChart();
+	}
 
-	watch: {
-		sort() {
-			this.fetchInstances();
-		},
+	@Watch('chartSpan')
+	public watchChartSpan() {
+		this.renderChart();
+	}
 
-		state() {
-			this.fetchInstances();
-		},
-
-		async instance() {
-			this.now = new Date();
-
-			const [perHour, perDay] = await Promise.all([
-				this.$root.api('charts/instance', { host: this.instance.host, limit: chartLimit, span: 'hour' }),
-				this.$root.api('charts/instance', { host: this.instance.host, limit: chartLimit, span: 'day' }),
-			]);
-
-			const chart = {
-				perHour: perHour,
-				perDay: perDay
-			};
-
-			this.chart = chart;
-
-			this.renderChart();
-		},
-
-		chartSrc() {
-			this.renderChart();
-		},
-
-		chartSpan() {
-			this.renderChart();
-		}
-	},
-
-	mounted() {
+	public mounted() {
 		this.fetchInstances();
 
 		this.$root.getMeta().then(meta => {
 			this.blockedHosts = meta.blockedHosts.join('\n');
 		});
-	},
+	}
 
-	beforeDestroy() {
+	public beforeDestroy() {
 		this.chartInstance.destroy();
-	},
+	}
 
-	methods: {
-		showInstance(target?: string) {
-			this.$root.api('federation/show-instance', {
-				host: target || this.target
-			}).then(instance => {
-				if (instance == null) {
-					this.$root.dialog({
-						type: 'error',
-						text: this.$t('instance-not-registered')
-					});
-				} else {
-					this.instance = instance;
-					this.target = '';
-				}
+	public showInstance(target?: string) {
+		const instance = this.$root.api('federation/show-instance', {
+			host: target || this.target
+		}) as Instance;
+		if (instance == null) {
+			this.$root.dialog({
+				type: 'error',
+				text: this.$t('instance-not-registered')
 			});
-		},
+		} else {
+			this.instance = instance;
+			this.target = '';
+		}
+	}
 
-		fetchInstances() {
-			this.instances = [];
-			this.$root.api('federation/instances', {
-				blocked: this.state === 'blocked' ? true : null,
-				notResponding: this.state === 'notResponding' ? true : null,
-				markedAsClosed: this.state === 'markedAsClosed' ? true : null,
-				sort: this.sort,
-				limit: this.limit
-			}).then(instances => {
-				this.instances = instances;
+	public fetchInstances() {
+		this.instances = [];
+		this.$root.api('federation/instances', {
+			blocked: this.state === 'blocked' ? true : null,
+			notResponding: this.state === 'notResponding' ? true : null,
+			markedAsClosed: this.state === 'markedAsClosed' ? true : null,
+			sort: this.sort,
+			limit: this.limit
+		}).then(instances => {
+			this.instances = instances;
+		});
+	}
+
+	public removeAllFollowing() {
+		this.$root.api('admin/federation/remove-all-following', {
+			host: this.instance.host
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				splash: true
 			});
-		},
+		});
+	}
 
-		removeAllFollowing() {
-			this.$root.api('admin/federation/remove-all-following', {
-				host: this.instance.host
-			}).then(() => {
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
+	public deleteAllFiles() {
+		this.$root.api('admin/federation/delete-all-files', {
+			host: this.instance.host
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				splash: true
 			});
-		},
+		});
+	}
 
-		deleteAllFiles() {
-			this.$root.api('admin/federation/delete-all-files', {
-				host: this.instance.host
-			}).then(() => {
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			});
-		},
+	public updateInstance() {
+		this.$root.api('admin/federation/update-instance', {
+			host: this.instance.host,
+			isClosed: this.instance.isMarkedAsClosed || false
+		});
+	}
 
-		updateInstance() {
-			this.$root.api('admin/federation/update-instance', {
-				host: this.instance.host,
-				isBlocked: this.instance.isBlocked || false,
-				isClosed: this.instance.isMarkedAsClosed || false
-			});
-		},
+	public setSrc(src) {
+		this.chartSrc = src;
+	}
 
-		setSrc(src) {
-			this.chartSrc = src;
-		},
+	public renderChart() {
+		if (this.chartInstance) {
+			this.chartInstance.destroy();
+		}
 
-		renderChart() {
-			if (this.chartInstance) {
-				this.chartInstance.destroy();
-			}
-
-			this.chartInstance = new ApexCharts(this.$refs.chart, {
-				chart: {
-					type: 'area',
-					height: 300,
-					animations: {
-						dynamicAnimation: {
-							enabled: false
-						}
-					},
-					toolbar: {
-						show: false
-					},
-					zoom: {
+		this.chartInstance = new ApexCharts(this.$refs.chart, {
+			chart: {
+				type: 'area',
+				height: 300,
+				animations: {
+					dynamicAnimation: {
 						enabled: false
 					}
 				},
-				dataLabels: {
+				toolbar: {
+					show: false
+				},
+				zoom: {
 					enabled: false
+				}
+			},
+			dataLabels: {
+				enabled: false
+			},
+			grid: {
+				clipMarkers: false,
+				borderColor: 'rgba(0, 0, 0, 0.1)'
+			},
+			stroke: {
+				curve: 'straight',
+				width: 2
+			},
+			tooltip: {
+				theme: this.$store.state.device.darkmode ? 'dark' : 'light'
+			},
+			legend: {
+				labels: {
+					colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
 				},
-				grid: {
-					clipMarkers: false,
-					borderColor: 'rgba(0, 0, 0, 0.1)'
-				},
-				stroke: {
-					curve: 'straight',
-					width: 2
-				},
-				tooltip: {
-					theme: this.$store.state.device.darkmode ? 'dark' : 'light'
-				},
-				legend: {
-					labels: {
+			},
+			xaxis: {
+				type: 'datetime',
+				labels: {
+					style: {
 						colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-					},
-				},
-				xaxis: {
-					type: 'datetime',
-					labels: {
-						style: {
-							colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-						}
-					},
-					axisBorder: {
-						color: 'rgba(0, 0, 0, 0.1)'
-					},
-					axisTicks: {
-						color: 'rgba(0, 0, 0, 0.1)'
-					},
-				},
-				yaxis: {
-					labels: {
-						formatter: this.data.bytes ? v => Vue.filter('bytes')(v, 0) : v => Vue.filter('number')(v),
-						style: {
-							color: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-						}
 					}
 				},
-				series: this.data.series
+				axisBorder: {
+					color: 'rgba(0, 0, 0, 0.1)'
+				},
+				axisTicks: {
+					color: 'rgba(0, 0, 0, 0.1)'
+				},
+			},
+			yaxis: {
+				labels: {
+					formatter: this.data.bytes ? v => Vue.filter('bytes')(v, 0) : v => Vue.filter('number')(v),
+					style: {
+						color: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
+					}
+				}
+			},
+			series: this.data.series
+		});
+
+		this.chartInstance.render();
+	}
+
+	public getDate(i: number) {
+		const y = this.now.getFullYear();
+		const m = this.now.getMonth();
+		const d = this.now.getDate();
+		const h = this.now.getHours();
+
+		return (
+			this.chartSpan == 'day' ? new Date(y, m, d - i) :
+			this.chartSpan == 'hour' ? new Date(y, m, d, h - i) :
+			null
+		);
+	}
+
+	public format(arr) {
+		return arr.map((v, i) => ({ x: this.getDate(i).getTime(), y: v }));
+	}
+
+	public requestsChart(): any {
+		return {
+			series: [{
+				name: 'Incoming',
+				data: this.format(this.stats.requests.received)
+			}, {
+				name: 'Outgoing (succeeded)',
+				data: this.format(this.stats.requests.succeeded)
+			}, {
+				name: 'Outgoing (failed)',
+				data: this.format(this.stats.requests.failed)
+			}]
+		};
+	}
+
+	public vusersChart(total: boolean): any {
+		return {
+			series: [{
+				name: 'Users',
+				type: 'area',
+				data: this.format(total
+					? this.stats.users.total
+					: sum(this.stats.users.inc, negate(this.stats.users.dec))
+				)
+			}]
+		};
+	}
+
+	public notesChart(total: boolean): any {
+		return {
+			series: [{
+				name: 'Notes',
+				type: 'area',
+				data: this.format(total
+					? this.stats.notes.total
+					: sum(this.stats.notes.inc, negate(this.stats.notes.dec))
+				)
+			}]
+		};
+	}
+
+	public ffChart(total: boolean): any {
+		return {
+			series: [{
+				name: 'Following',
+				type: 'area',
+				data: this.format(total
+					? this.stats.following.total
+					: sum(this.stats.following.inc, negate(this.stats.following.dec))
+				)
+			}, {
+				name: 'Followers',
+				type: 'area',
+				data: this.format(total
+					? this.stats.followers.total
+					: sum(this.stats.followers.inc, negate(this.stats.followers.dec))
+				)
+			}]
+		};
+	}
+
+	public driveUsageChart(total: boolean): any {
+		return {
+			bytes: true,
+			series: [{
+				name: 'Drive usage',
+				type: 'area',
+				data: this.format(total
+					? this.stats.drive.totalUsage
+					: sum(this.stats.drive.incUsage, negate(this.stats.drive.decUsage))
+				)
+			}]
+		};
+	}
+
+	public driveFilesChart(total: boolean): any {
+		return {
+			series: [{
+				name: 'Drive files',
+				type: 'area',
+				data: this.format(total
+					? this.stats.drive.totalFiles
+					: sum(this.stats.drive.incFiles, negate(this.stats.drive.decFiles))
+				)
+			}]
+		};
+	}
+
+	public saveBlockedHosts() {
+		this.$root.api('admin/update-meta', {
+			blockedHosts: this.blockedHosts.split('\n')
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('saved')
 			});
-
-			this.chartInstance.render();
-		},
-
-		getDate(i: number) {
-			const y = this.now.getFullYear();
-			const m = this.now.getMonth();
-			const d = this.now.getDate();
-			const h = this.now.getHours();
-
-			return (
-				this.chartSpan == 'day' ? new Date(y, m, d - i) :
-				this.chartSpan == 'hour' ? new Date(y, m, d, h - i) :
-				null
-			);
-		},
-
-		format(arr) {
-			return arr.map((v, i) => ({ x: this.getDate(i).getTime(), y: v }));
-		},
-
-		requestsChart(): any {
-			return {
-				series: [{
-					name: 'Incoming',
-					data: this.format(this.stats.requests.received)
-				}, {
-					name: 'Outgoing (succeeded)',
-					data: this.format(this.stats.requests.succeeded)
-				}, {
-					name: 'Outgoing (failed)',
-					data: this.format(this.stats.requests.failed)
-				}]
-			};
-		},
-
-		usersChart(total: boolean): any {
-			return {
-				series: [{
-					name: 'Users',
-					type: 'area',
-					data: this.format(total
-						? this.stats.users.total
-						: sum(this.stats.users.inc, negate(this.stats.users.dec))
-					)
-				}]
-			};
-		},
-
-		notesChart(total: boolean): any {
-			return {
-				series: [{
-					name: 'Notes',
-					type: 'area',
-					data: this.format(total
-						? this.stats.notes.total
-						: sum(this.stats.notes.inc, negate(this.stats.notes.dec))
-					)
-				}]
-			};
-		},
-
-		ffChart(total: boolean): any {
-			return {
-				series: [{
-					name: 'Following',
-					type: 'area',
-					data: this.format(total
-						? this.stats.following.total
-						: sum(this.stats.following.inc, negate(this.stats.following.dec))
-					)
-				}, {
-					name: 'Followers',
-					type: 'area',
-					data: this.format(total
-						? this.stats.followers.total
-						: sum(this.stats.followers.inc, negate(this.stats.followers.dec))
-					)
-				}]
-			};
-		},
-
-		driveUsageChart(total: boolean): any {
-			return {
-				bytes: true,
-				series: [{
-					name: 'Drive usage',
-					type: 'area',
-					data: this.format(total
-						? this.stats.drive.totalUsage
-						: sum(this.stats.drive.incUsage, negate(this.stats.drive.decUsage))
-					)
-				}]
-			};
-		},
-
-		driveFilesChart(total: boolean): any {
-			return {
-				series: [{
-					name: 'Drive files',
-					type: 'area',
-					data: this.format(total
-						? this.stats.drive.totalFiles
-						: sum(this.stats.drive.incFiles, negate(this.stats.drive.decFiles))
-					)
-				}]
-			};
-		},
-
-		saveBlockedHosts() {
-			this.$root.api('admin/update-meta', {
-				blockedHosts: this.blockedHosts.split('\n')
-			}).then(() => {
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('saved')
-				});
-			}).catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e
-				});
+		}).catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e
 			});
-		}
+		});
 	}
 }
 </script>

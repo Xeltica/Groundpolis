@@ -24,7 +24,7 @@
 
 	<ui-card>
 		<template #title><fa :icon="faGrin"/> {{ $t('emojis.title') }}</template>
-		<section v-for="emoji in emojis" class="oryfrbft">
+		<section v-for="emoji in emojis" :key="emoji.id" class="oryfrbft">
 			<div>
 				<img :src="emoji.url" :alt="emoji.name" style="width: 64px;"/>
 			</div>
@@ -55,34 +55,84 @@
 import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faGrin } from '@fortawesome/free-regular-svg-icons';
+import { Emoji } from '../../../../models/entities/emoji';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/emoji.vue'),
-	data() {
-		return {
-			name: '',
-			url: '',
-			aliases: '',
-			emojis: [],
-			faGrin
-		};
-	},
+})
+export default class EmojiViewModel extends Vue {
+	private name = '';
+	private url = '';
+	private aliases = '';
+	private emojis: Emoji[];
+	private faGrin = faGrin;
 
-	mounted() {
+	public mounted() {
 		this.fetchEmojis();
-	},
+	}
 
-	methods: {
-		add() {
-			this.$root.api('admin/emoji/add', {
-				name: this.name,
-				url: this.url,
-				aliases: this.aliases.split(' ').filter(x => x.length > 0)
+	public add() {
+		this.$root.api('admin/emoji/add', {
+			name: this.name,
+			url: this.url,
+			aliases: this.aliases.split(' ').filter(x => x.length > 0)
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('add-emoji.added')
+			});
+			this.fetchEmojis();
+		}).catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e
+			});
+		});
+	}
+
+	public fetchEmojis() {
+		this.$root.api('admin/emoji/list').then(emojis => {
+			emojis.reverse();
+			for (const e of emojis) {
+				e.aliases = (e.aliases || []).join(' ');
+			}
+			this.emojis = emojis;
+		});
+	}
+
+	public updateEmoji(emoji) {
+		this.$root.api('admin/emoji/update', {
+			id: emoji.id,
+			name: emoji.name,
+			url: emoji.url,
+			aliases: emoji.aliases.split(' ').filter(x => x.length > 0)
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('updated')
+			});
+		}).catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e
+			});
+		});
+	}
+
+	public removeEmoji(emoji) {
+		this.$root.dialog({
+			type: 'warning',
+			text: this.$t('remove-emoji.are-you-sure').toString().replace('$1', emoji.name),
+			showCancelButton: true
+		}).then(({ canceled }) => {
+			if (canceled) return;
+
+			this.$root.api('admin/emoji/remove', {
+				id: emoji.id
 			}).then(() => {
 				this.$root.dialog({
 					type: 'success',
-					text: this.$t('add-emoji.added')
+					text: this.$t('remove-emoji.removed')
 				});
 				this.fetchEmojis();
 			}).catch(e => {
@@ -91,61 +141,7 @@ export default class Vm extends Vue {
 					text: e
 				});
 			});
-		},
-
-		fetchEmojis() {
-			this.$root.api('admin/emoji/list').then(emojis => {
-				emojis.reverse();
-				for (const e of emojis) {
-					e.aliases = (e.aliases || []).join(' ');
-				}
-				this.emojis = emojis;
-			});
-		},
-
-		updateEmoji(emoji) {
-			this.$root.api('admin/emoji/update', {
-				id: emoji.id,
-				name: emoji.name,
-				url: emoji.url,
-				aliases: emoji.aliases.split(' ').filter(x => x.length > 0)
-			}).then(() => {
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('updated')
-				});
-			}).catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e
-				});
-			});
-		},
-
-		removeEmoji(emoji) {
-			this.$root.dialog({
-				type: 'warning',
-				text: this.$t('remove-emoji.are-you-sure').replace('$1', emoji.name),
-				showCancelButton: true
-			}).then(({ canceled }) => {
-				if (canceled) return;
-
-				this.$root.api('admin/emoji/remove', {
-					id: emoji.id
-				}).then(() => {
-					this.$root.dialog({
-						type: 'success',
-						text: this.$t('remove-emoji.removed')
-					});
-					this.fetchEmojis();
-				}).catch(e => {
-					this.$root.dialog({
-						type: 'error',
-						text: e
-					});
-				});
-			});
-		}
+		});
 	}
 }
 </script>
