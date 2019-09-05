@@ -178,7 +178,7 @@ const negate = arr => arr.map(x => -x);
 		date: v => v ? new Date(v).toLocaleString() : 'N/A'
 	},
 })
-export default class Vm extends Vue {
+export default class Federation extends Vue {
 
 	private instance: Instance;
 	private target: string;
@@ -186,7 +186,10 @@ export default class Vm extends Vue {
 	private state = 'all';
 	private limit = 100;
 	private instances: Instance[];
-	private chart: any;
+	private chart: {
+		perHour: any,
+		perDay: any,
+	};
 	private chartSrc = 'requests';
 	private chartSpan = 'hour';
 	private chartInstance: ApexCharts;
@@ -225,7 +228,7 @@ export default class Vm extends Vue {
 		}
 	}
 
-	public get stats(): any[] {
+	public get stats(): any {
 		const stats =
 			this.chartSpan == 'day' ? this.chart.perDay :
 			this.chartSpan == 'hour' ? this.chart.perHour :
@@ -424,7 +427,7 @@ export default class Vm extends Vue {
 			this.chartSpan == 'day' ? new Date(y, m, d - i) :
 			this.chartSpan == 'hour' ? new Date(y, m, d, h - i) :
 			null
-		);
+		)!;
 	}
 
 	public format(arr) {
@@ -446,7 +449,7 @@ export default class Vm extends Vue {
 		};
 	}
 
-	public vusersChart(total: boolean): any {
+	public usersChart(total: boolean): any {
 		return {
 			series: [{
 				name: 'Users',

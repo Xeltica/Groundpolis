@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Provide } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { version } from '../../config';
 import XDashboard from './dashboard.vue';
@@ -81,10 +81,9 @@ import { faGrin } from '@fortawesome/free-regular-svg-icons';
 const ua = navigator.userAgent.toLowerCase();
 const isMobile = /mobile|iphone|ipad|android/.test(ua);
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/index.vue'),
-	components: {
+		components: {
 		XDashboard,
 		XInstance,
 		XQueue,
@@ -98,28 +97,23 @@ export default class Vm extends Vue {
 		XAbuse,
 		XFederation,
 	},
-	provide: {
-		isMobile
-	},
-	data() {
-		return {
-			version,
-			isMobile,
-			navOpend: !isMobile,
-			faGrin,
-			faArrowLeft,
-			faHeadset,
-			faGlobe,
-			faExclamationCircle,
-			faTasks,
-			faStream,
-			faDatabase,
-		};
-	},
-	computed: {
-		page() {
-			return this.$route.params.page;
-		}
+})
+export default class Index extends Vue {
+
+	@Provide() private isMobile = isMobile;
+	private version = version;
+	private navOpend = !this.isMobile;
+	private faGrin = faGrin;
+	private faArrowLeft = faArrowLeft;
+	private faHeadset = faHeadset;
+	private faGlobe = faGlobe;
+	private faExclamationCircle = faExclamationCircle;
+	private faTasks = faTasks;
+	private faStream = faStream;
+	private faDatabase = faDatabase;
+
+	public page() {
+		return this.$route.params.page;
 	}
 }
 </script>

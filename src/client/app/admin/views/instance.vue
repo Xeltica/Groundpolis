@@ -249,79 +249,86 @@ import { url, host } from '../../config';
 import { toUnicode } from 'punycode';
 import { faHeadset, faShieldAlt, faGhost, faUserPlus, faBolt, faThumbtack, faPencilAlt, faHashtag } from '@fortawesome/free-solid-svg-icons';
 import { faEnvelope as farEnvelope, faSave } from '@fortawesome/free-regular-svg-icons';
+import { Meta } from '../../../../models/entities/meta';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/instance.vue'),
+})
+export default class Instance extends Vue {
 
-	data() {
-		return {
-			url,
-			host: toUnicode(host),
-			maintainerName: null,
-			maintainerEmail: null,
-			ToSUrl: null,
-			repositoryUrl: "https://github.com/xeltica/groundpolis",
-			feedbackUrl: null,
-			disableRegistration: false,
-			disableLocalTimeline: false,
-			disableGlobalTimeline: false,
-			enableEmojiReaction: true,
-			useStarForReactionFallback: false,
-			mascotImageUrl: null,
-			bannerUrl: null,
-			errorImageUrl: null,
-			iconUrl: null,
-			name: null,
-			description: null,
-			languages: null,
-			cacheRemoteFiles: false,
-			localDriveCapacityMb: null,
-			remoteDriveCapacityMb: null,
-			maxNoteTextLength: null,
-			enableRecaptcha: false,
-			recaptchaSiteKey: null,
-			recaptchaSecretKey: null,
-			enableTwitterIntegration: false,
-			twitterConsumerKey: null,
-			twitterConsumerSecret: null,
-			enableGithubIntegration: false,
-			githubClientId: null,
-			githubClientSecret: null,
-			enableDiscordIntegration: false,
-			discordClientId: null,
-			discordClientSecret: null,
-			proxyAccount: null,
-			summalyProxy: null,
-			enableEmail: false,
-			email: null,
-			smtpSecure: false,
-			smtpHost: null,
-			smtpPort: null,
-			smtpUser: null,
-			smtpPass: null,
-			smtpAuth: false,
-			enableServiceWorker: false,
-			swPublicKey: null,
-			swPrivateKey: null,
-			pinnedUsers: '',
-			hiddenTags: '',
-			useObjectStorage: false,
-			objectStorageBaseUrl: null,
-			objectStorageBucket: null,
-			objectStoragePrefix: null,
-			objectStorageEndpoint: null,
-			objectStorageRegion: null,
-			objectStoragePort: null,
-			objectStorageAccessKey: null,
-			objectStorageSecretKey: null,
-			objectStorageUseSSL: false,
-			faHeadset, faShieldAlt, faGhost, faUserPlus, farEnvelope, faBolt, faThumbtack, faPencilAlt, faSave, faHashtag
-		};
-	},
+			private url = url;
+			private host = toUnicode(host);
+			private maintainerName: string | null;
+			private maintainerEmail: string | null;
+			private ToSUrl: string | null;
+			private repositoryUrl = 'https://github.com/xeltica/groundpolis';
+			private feedbackUrl: string | null;
+			private disableRegistration = false;
+			private disableLocalTimeline = false;
+			private disableGlobalTimeline = false;
+			private enableEmojiReaction = true;
+			private useStarForReactionFallback = false;
+			private mascotImageUrl: string | null;
+			private bannerUrl: string | null;
+			private errorImageUrl: string | null;
+			private iconUrl: string | null;
+			private name: string | null;
+			private description: string | null;
+			private languages: string | null;
+			private cacheRemoteFiles = false;
+			private localDriveCapacityMb: number;
+			private remoteDriveCapacityMb: number;
+			private maxNoteTextLength: number;
+			private enableRecaptcha = false;
+			private recaptchaSiteKey: string | null;
+			private recaptchaSecretKey: string | null;
+			private enableTwitterIntegration = false;
+			private twitterConsumerKey: string | null;
+			private twitterConsumerSecret: string | null;
+			private enableGithubIntegration = false;
+			private githubClientId: string | null;
+			private githubClientSecret: string | null;
+			private enableDiscordIntegration = false;
+			private discordClientId: string | null;
+			private discordClientSecret: string | null;
+			private proxyAccount: string | null;
+			private summalyProxy: string | null;
+			private enableEmail = false;
+			private email: string | null;
+			private smtpSecure = false;
+			private smtpHost: string | null;
+			private smtpPort: number | null;
+			private smtpUser: string | null;
+			private smtpPass: string | null;
+			private smtpAuth = false;
+			private enableServiceWorker = false;
+			private swPublicKey: string | null;
+			private swPrivateKey: string | null;
+			private pinnedUsers = '';
+			private hiddenTags = '';
+			private useObjectStorage = false;
+			private objectStorageBaseUrl: string | null;
+			private objectStorageBucket: string | null;
+			private objectStoragePrefix: string | null;
+			private objectStorageEndpoint: string | null;
+			private objectStorageRegion: string | null;
+			private objectStoragePort: number | null;
+			private objectStorageAccessKey: string | null;
+			private objectStorageSecretKey: string | null;
+			private objectStorageUseSSL = false;
+			private faHeadset = faHeadset;
+			private faShieldAlt = faShieldAlt;
+			private faGhost = faGhost;
+			private faUserPlus = faUserPlus;
+			private farEnvelope = farEnvelope;
+			private faBolt = faBolt;
+			private faThumbtack = faThumbtack;
+			private faPencilAlt = faPencilAlt;
+			private faSave = faSave;
+			private faHashtag = faHashtag;
 
 	created() {
-		this.$root.getMeta(true).then(meta => {
+		this.$root.getMeta(true).then((meta) => {
 			this.maintainerName = meta.maintainerName;
 			this.maintainerEmail = meta.maintainerEmail;
 			this.ToSUrl = meta.ToSUrl;
@@ -381,9 +388,9 @@ export default class Vm extends Vue {
 			this.objectStorageSecretKey = meta.objectStorageSecretKey;
 			this.objectStorageUseSSL = meta.objectStorageUseSSL;
 		});
-	},
+	}
 
-	mounted() {
+	public mounted() {
 		const renderRecaptchaPreview = () => {
 			if (!(window as any).grecaptcha) return;
 			if (!this.$refs.recaptcha) return;
@@ -393,7 +400,7 @@ export default class Vm extends Vue {
 			});
 		};
 
-		window.onRecaotchaLoad = () => {
+		(window as any).onRecaptchaLoad = () => {
 			renderRecaptchaPreview();
 		};
 
@@ -409,112 +416,110 @@ export default class Vm extends Vue {
 		this.$watch('recaptchaSiteKey', () => {
 			renderRecaptchaPreview();
 		});
-	},
+	}
 
-	methods: {
-		invite() {
-			this.$root.api('admin/invite').then(x => {
-				this.$root.dialog({
-					type: 'info',
-					text: x.code
-				});
-			}).catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e
-				});
+	public invite() {
+		this.$root.api('admin/invite').then(x => {
+			this.$root.dialog({
+				type: 'info',
+				text: x.code
 			});
-		},
+		}).catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e
+			});
+		});
+	}
 
-		async testEmail() {
-			this.$root.api('admin/send-email', {
-				to: this.maintainerEmail,
-				subject: 'Test email',
-				text: 'Yo'
-			}).then(x => {
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			}).catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e
-				});
+	public async testEmail() {
+		this.$root.api('admin/send-email', {
+			to: this.maintainerEmail,
+			subject: 'Test email',
+			text: 'Yo'
+		}).then(x => {
+			this.$root.dialog({
+				type: 'success',
+				splash: true
 			});
-		},
+		}).catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e
+			});
+		});
+	}
 
-		updateMeta() {
-			this.$root.api('admin/update-meta', {
-				maintainerName: this.maintainerName,
-				maintainerEmail: this.maintainerEmail,
-				ToSUrl: this.ToSUrl,
-				repositoryUrl: this.repositoryUrl,
-				feedbackUrl: this.feedbackUrl,
-				disableRegistration: this.disableRegistration,
-				disableLocalTimeline: this.disableLocalTimeline,
-				disableGlobalTimeline: this.disableGlobalTimeline,
-				enableEmojiReaction: this.enableEmojiReaction,
-				useStarForReactionFallback: this.useStarForReactionFallback,
-				mascotImageUrl: this.mascotImageUrl,
-				bannerUrl: this.bannerUrl,
-				errorImageUrl: this.errorImageUrl,
-				iconUrl: this.iconUrl,
-				name: this.name,
-				description: this.description,
-				langs: this.languages.split(' '),
-				cacheRemoteFiles: this.cacheRemoteFiles,
-				localDriveCapacityMb: parseInt(this.localDriveCapacityMb, 10),
-				remoteDriveCapacityMb: parseInt(this.remoteDriveCapacityMb, 10),
-				maxNoteTextLength: parseInt(this.maxNoteTextLength, 10),
-				enableRecaptcha: this.enableRecaptcha,
-				recaptchaSiteKey: this.recaptchaSiteKey,
-				recaptchaSecretKey: this.recaptchaSecretKey,
-				proxyAccount: this.proxyAccount,
-				enableTwitterIntegration: this.enableTwitterIntegration,
-				twitterConsumerKey: this.twitterConsumerKey,
-				twitterConsumerSecret: this.twitterConsumerSecret,
-				enableGithubIntegration: this.enableGithubIntegration,
-				githubClientId: this.githubClientId,
-				githubClientSecret: this.githubClientSecret,
-				enableDiscordIntegration: this.enableDiscordIntegration,
-				discordClientId: this.discordClientId,
-				discordClientSecret: this.discordClientSecret,
-				summalyProxy: this.summalyProxy,
-				enableEmail: this.enableEmail,
-				email: this.email,
-				smtpSecure: this.smtpSecure,
-				smtpHost: this.smtpHost,
-				smtpPort: parseInt(this.smtpPort, 10),
-				smtpUser: this.smtpAuth ? this.smtpUser : '',
-				smtpPass: this.smtpAuth ? this.smtpPass : '',
-				enableServiceWorker: this.enableServiceWorker,
-				swPublicKey: this.swPublicKey,
-				swPrivateKey: this.swPrivateKey,
-				pinnedUsers: this.pinnedUsers.split('\n'),
-				hiddenTags: this.hiddenTags.split('\n'),
-				useObjectStorage: this.useObjectStorage,
-				objectStorageBaseUrl: this.objectStorageBaseUrl ? this.objectStorageBaseUrl : null,
-				objectStorageBucket: this.objectStorageBucket ? this.objectStorageBucket : null,
-				objectStoragePrefix: this.objectStoragePrefix ? this.objectStoragePrefix : null,
-				objectStorageEndpoint: this.objectStorageEndpoint ? this.objectStorageEndpoint : null,
-				objectStorageRegion: this.objectStorageRegion ? this.objectStorageRegion : null,
-				objectStoragePort: this.objectStoragePort ? this.objectStoragePort : null,
-				objectStorageAccessKey: this.objectStorageAccessKey ? this.objectStorageAccessKey : null,
-				objectStorageSecretKey: this.objectStorageSecretKey ? this.objectStorageSecretKey : null,
-				objectStorageUseSSL: this.objectStorageUseSSL,
-			}).then(() => {
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('saved')
-				});
-			}).catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e
-				});
+	public updateMeta() {
+		this.$root.api('admin/update-meta', {
+			maintainerName: this.maintainerName,
+			maintainerEmail: this.maintainerEmail,
+			ToSUrl: this.ToSUrl,
+			repositoryUrl: this.repositoryUrl,
+			feedbackUrl: this.feedbackUrl,
+			disableRegistration: this.disableRegistration,
+			disableLocalTimeline: this.disableLocalTimeline,
+			disableGlobalTimeline: this.disableGlobalTimeline,
+			enableEmojiReaction: this.enableEmojiReaction,
+			useStarForReactionFallback: this.useStarForReactionFallback,
+			mascotImageUrl: this.mascotImageUrl,
+			bannerUrl: this.bannerUrl,
+			errorImageUrl: this.errorImageUrl,
+			iconUrl: this.iconUrl,
+			name: this.name,
+			description: this.description,
+			langs: this.languages!.split(' '),
+			cacheRemoteFiles: this.cacheRemoteFiles,
+			localDriveCapacityMb: this.localDriveCapacityMb,
+			remoteDriveCapacityMb: this.remoteDriveCapacityMb,
+			maxNoteTextLength: this.maxNoteTextLength,
+			enableRecaptcha: this.enableRecaptcha,
+			recaptchaSiteKey: this.recaptchaSiteKey,
+			recaptchaSecretKey: this.recaptchaSecretKey,
+			proxyAccount: this.proxyAccount,
+			enableTwitterIntegration: this.enableTwitterIntegration,
+			twitterConsumerKey: this.twitterConsumerKey,
+			twitterConsumerSecret: this.twitterConsumerSecret,
+			enableGithubIntegration: this.enableGithubIntegration,
+			githubClientId: this.githubClientId,
+			githubClientSecret: this.githubClientSecret,
+			enableDiscordIntegration: this.enableDiscordIntegration,
+			discordClientId: this.discordClientId,
+			discordClientSecret: this.discordClientSecret,
+			summalyProxy: this.summalyProxy,
+			enableEmail: this.enableEmail,
+			email: this.email,
+			smtpSecure: this.smtpSecure,
+			smtpHost: this.smtpHost,
+			smtpPort: this.smtpPort,
+			smtpUser: this.smtpAuth ? this.smtpUser : '',
+			smtpPass: this.smtpAuth ? this.smtpPass : '',
+			enableServiceWorker: this.enableServiceWorker,
+			swPublicKey: this.swPublicKey,
+			swPrivateKey: this.swPrivateKey,
+			pinnedUsers: this.pinnedUsers.split('\n'),
+			hiddenTags: this.hiddenTags.split('\n'),
+			useObjectStorage: this.useObjectStorage,
+			objectStorageBaseUrl: this.objectStorageBaseUrl ? this.objectStorageBaseUrl : null,
+			objectStorageBucket: this.objectStorageBucket ? this.objectStorageBucket : null,
+			objectStoragePrefix: this.objectStoragePrefix ? this.objectStoragePrefix : null,
+			objectStorageEndpoint: this.objectStorageEndpoint ? this.objectStorageEndpoint : null,
+			objectStorageRegion: this.objectStorageRegion ? this.objectStorageRegion : null,
+			objectStoragePort: this.objectStoragePort ? this.objectStoragePort : null,
+			objectStorageAccessKey: this.objectStorageAccessKey ? this.objectStorageAccessKey : null,
+			objectStorageSecretKey: this.objectStorageSecretKey ? this.objectStorageSecretKey : null,
+			objectStorageUseSSL: this.objectStorageUseSSL,
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('saved')
 			});
-		}
+		}).catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e
+			});
+		});
 	}
 }
 </script>

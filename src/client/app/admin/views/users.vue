@@ -77,336 +77,342 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import i18n from '../../i18n';
-import parseAcct from "../../../../misc/acct/parse";
+import parseAcct from '../../../../misc/acct/parse';
 import { faCertificate, faUsers, faTerminal, faSearch, faKey, faSync, faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons';
 import { faSnowflake, faTrashAlt } from '@fortawesome/free-regular-svg-icons';
 import XUser from './users.user.vue';
+import { User } from '../../../../models/entities/user';
+import { TranslateResult } from 'vue-i18n';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/users.vue'),
 	components: {
 		XUser
 	},
-	data() {
-		return {
-			user: null,
-			target: null,
-			verifying: false,
-			unverifying: false,
-			suspending: false,
-			unsuspending: false,
-			sort: '+createdAt',
-			state: 'all',
-			origin: 'local',
-			searchUsername: '',
-			searchHost: '',
-			limit: 10,
-			offset: 0,
-			users: [],
-			existMore: false,
-			faTerminal, faCertificate, faUsers, faSnowflake, faSearch, faKey, faSync, faMicrophoneSlash, faTrashAlt
-		};
-	},
+})
+export default class Users extends Vue {
+	private user: User | null;
+	private target: string;
+	private verifying = false;
+	private unverifying = false;
+	private suspending = false;
+	private unsuspending = false;
+	private sort = '+createdAt';
+	private state = 'all';
+	private origin = 'local';
+	private searchUsername = '';
+	private searchHost = '';
+	private limit = 10;
+	private offset = 0;
+	private users: User[];
+	private existMore = false;
+	private faTerminal = faTerminal;
+	private faCertificate = faCertificate;
+	private faUsers = faUsers;
+	private faSnowflake = faSnowflake;
+	private faSearch = faSearch;
+	private faKey = faKey;
+	private faSync = faSync;
+	private faMicrophoneSlash = faMicrophoneSlash;
+	private faTrashAlt = faTrashAlt;
 
-	watch: {
-		sort() {
-			this.users = [];
-			this.offset = 0;
-			this.fetchUsers();
-		},
-
-		state() {
-			this.users = [];
-			this.offset = 0;
-			this.fetchUsers();
-		},
-
-		origin() {
-			if (this.origin === 'local') this.searchHost = '';
-			this.users = [];
-			this.offset = 0;
-			this.fetchUsers();
-		}
-	},
-
-	mounted() {
+	@Watch('sort')
+	public watchSort() {
+		this.users = [];
+		this.offset = 0;
 		this.fetchUsers();
-	},
+	}
 
-	methods: {
-		/** テキストエリアのユーザーを解決する */
-		fetchUser() {
-			return new Promise((res) => {
-				const usernamePromise = this.$root.api('users/show', parseAcct(this.target));
-				const idPromise = this.$root.api('users/show', { userId: this.target });
+	@Watch('state')
+	public watchState() {
+		this.users = [];
+		this.offset = 0;
+		this.fetchUsers();
+	}
 
-				let _notFound = false;
-				const notFound = () => {
-					if (_notFound) {
-						this.$root.dialog({
-							type: 'error',
-							text: this.$t('user-not-found')
-						});
-					} else {
-						_notFound = true;
-					}
-				};
+	@Watch('origin')
+	public watchOrigin() {
+		if (this.origin === 'local') this.searchHost = '';
+		this.users = [];
+		this.offset = 0;
+		this.fetchUsers();
+	}
 
-				usernamePromise.then(res).catch(e => {
-					if (e == 'user not found') {
-						notFound();
-					}
-				});
-				idPromise.then(res).catch(e => {
-					notFound();
-				});
-			});
-		},
+	public mounted() {
+		this.fetchUsers();
+	}
 
-		/** テキストエリアから処理対象ユーザーを設定する */
-		async showUser() {
-			this.user = null;
-			const user = await this.fetchUser();
-			this.$root.api('admin/show-user', { userId: user.id }).then(info => {
-				this.user = info;
-			});
-			this.target = '';
-		},
+	/** テキストエリアのユーザーを解決する */
+	public fetchUser() {
+		return new Promise<User>((res) => {
+			const usernamePromise = this.$root.api('users/show', parseAcct(this.target));
+			const idPromise = this.$root.api('users/show', { userId: this.target });
 
-		async showUserOnClick(userId: string) {
-			this.$root.api('admin/show-user', { userId: userId }).then(info => {
-				this.user = info;
-				this.$nextTick(() => {
-					this.$refs.user.scrollIntoView();
-				});
-			});
-		},
-
-		/** 処理対象ユーザーの情報を更新する */
-		async refreshUser() {
-			this.$root.api('admin/show-user', { userId: this.user.id }).then(info => {
-				this.user = info;
-			});
-		},
-
-		async resetPassword() {
-			if (!await this.getConfirmed(this.$t('reset-password-confirm'))) return;
-
-			this.$root.api('admin/reset-password', { userId: this.user.id }).then(res => {
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('password-updated', { password: res.password })
-				});
-			});
-		},
-
-		async verifyUser() {
-			if (!await this.getConfirmed(this.$t('verify-confirm'))) return;
-
-			this.verifying = true;
-
-			const process = async () => {
-				await this.$root.api('admin/verify-user', { userId: this.user.id });
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('verified')
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.toString()
-				});
-			});
-
-			this.verifying = false;
-
-			this.refreshUser();
-		},
-
-		async unverifyUser() {
-			if (!await this.getConfirmed(this.$t('unverify-confirm'))) return;
-
-			this.unverifying = true;
-
-			const process = async () => {
-				await this.$root.api('admin/unverify-user', { userId: this.user.id });
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('unverified')
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.toString()
-				});
-			});
-
-			this.unverifying = false;
-
-			this.refreshUser();
-		},
-
-		async silenceUser() {
-			if (!await this.getConfirmed(this.$t('silence-confirm'))) return;
-
-			const process = async () => {
-				await this.$root.api('admin/silence-user', { userId: this.user.id });
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-
-			this.refreshUser();
-		},
-
-		async unsilenceUser() {
-			if (!await this.getConfirmed(this.$t('unsilence-confirm'))) return;
-
-			const process = async () => {
-				await this.$root.api('admin/unsilence-user', { userId: this.user.id });
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-
-			this.refreshUser();
-		},
-
-		async suspendUser() {
-			if (!await this.getConfirmed(this.$t('suspend-confirm'))) return;
-
-			this.suspending = true;
-
-			const process = async () => {
-				await this.$root.api('admin/suspend-user', { userId: this.user.id });
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('suspended')
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-
-			this.suspending = false;
-
-			this.refreshUser();
-		},
-
-		async unsuspendUser() {
-			if (!await this.getConfirmed(this.$t('unsuspend-confirm'))) return;
-
-			this.unsuspending = true;
-
-			const process = async () => {
-				await this.$root.api('admin/unsuspend-user', { userId: this.user.id });
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('unsuspended')
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-
-			this.unsuspending = false;
-
-			this.refreshUser();
-		},
-
-		async updateRemoteUser() {
-			this.$root.api('admin/update-remote-user', { userId: this.user.id }).then(res => {
-				this.$root.dialog({
-					type: 'success',
-					text: this.$t('remote-user-updated')
-				});
-			});
-
-			this.refreshUser();
-		},
-
-		async deleteAllFiles() {
-			if (!await this.getConfirmed(this.$t('delete-all-files-confirm'))) return;
-
-			const process = async () => {
-				await this.$root.api('admin/delete-all-files-of-a-user', { userId: this.user.id });
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
-			});
-		},
-
-		async getConfirmed(text: string): Promise<Boolean> {
-			const confirm = await this.$root.dialog({
-				type: 'warning',
-				showCancelButton: true,
-				title: 'confirm',
-				text,
-			});
-
-			return !confirm.canceled;
-		},
-
-		fetchUsers(truncate?: boolean) {
-			if (truncate) this.offset = 0;
-			this.$root.api('admin/show-users', {
-				state: this.state,
-				origin: this.origin,
-				sort: this.sort,
-				offset: this.offset,
-				limit: this.limit + 1,
-				username: this.searchUsername,
-				hostname: this.searchHost
-			}).then(users => {
-				if (users.length == this.limit + 1) {
-					users.pop();
-					this.existMore = true;
+			let _notFound = false;
+			const notFound = () => {
+				if (_notFound) {
+					this.$root.dialog({
+						type: 'error',
+						text: this.$t('user-not-found')
+					});
 				} else {
-					this.existMore = false;
+					_notFound = true;
 				}
-				this.users = truncate ? users : this.users.concat(users);
-				this.offset += this.limit;
+			};
+
+			usernamePromise.then(res).catch(e => {
+				if (e == 'user not found') {
+					notFound();
+				}
 			});
-		}
+			idPromise.then(res).catch(e => {
+				notFound();
+			});
+		});
+	}
+
+	/** テキストエリアから処理対象ユーザーを設定する */
+	public async showUser() {
+		this.user = null;
+		const user = await this.fetchUser();
+		this.$root.api('admin/show-user', { userId: user.id }).then(info => {
+			this.user = info;
+		});
+		this.target = '';
+	}
+
+	public async showUserOnClick(userId: string) {
+		this.$root.api('admin/show-user', { userId: userId }).then(info => {
+			this.user = info;
+			this.$nextTick(() => {
+				(this.$refs.user as HTMLElement).scrollIntoView();
+			});
+		});
+	}
+
+	/** 処理対象ユーザーの情報を更新する */
+	public async refreshUser() {
+		this.$root.api('admin/show-user', { userId: this.user!.id }).then(info => {
+			this.user = info;
+		});
+	}
+
+	public async resetPassword() {
+		if (!await this.getConfirmed(this.$t('reset-password-confirm'))) return;
+
+		this.$root.api('admin/reset-password', { userId: this.user!.id }).then(res => {
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('password-updated', { password: res.password })
+			});
+		});
+	}
+
+	public async verifyUser() {
+		if (!await this.getConfirmed(this.$t('verify-confirm'))) return;
+
+		this.verifying = true;
+
+		const process = async () => {
+			await this.$root.api('admin/verify-user', { userId: this.user!.id });
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('verified')
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.toString()
+			});
+		});
+
+		this.verifying = false;
+
+		this.refreshUser();
+	}
+
+	public async unverifyUser() {
+		if (!await this.getConfirmed(this.$t('unverify-confirm'))) return;
+
+		this.unverifying = true;
+
+		const process = async () => {
+			await this.$root.api('admin/unverify-user', { userId: this.user!.id });
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('unverified')
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.toString()
+			});
+		});
+
+		this.unverifying = false;
+
+		this.refreshUser();
+	}
+
+	public async silenceUser() {
+		if (!await this.getConfirmed(this.$t('silence-confirm'))) return;
+
+		const process = async () => {
+			await this.$root.api('admin/silence-user', { userId: this.user!.id });
+			this.$root.dialog({
+				type: 'success',
+				splash: true
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+
+		this.refreshUser();
+	}
+
+	public async unsilenceUser() {
+		if (!await this.getConfirmed(this.$t('unsilence-confirm'))) return;
+
+		const process = async () => {
+			await this.$root.api('admin/unsilence-user', { userId: this.user!.id });
+			this.$root.dialog({
+				type: 'success',
+				splash: true
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+
+		this.refreshUser();
+	}
+
+	public async suspendUser() {
+		if (!await this.getConfirmed(this.$t('suspend-confirm'))) return;
+
+		this.suspending = true;
+
+		const process = async () => {
+			await this.$root.api('admin/suspend-user', { userId: this.user!.id });
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('suspended')
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+
+		this.suspending = false;
+
+		this.refreshUser();
+	}
+
+	public async unsuspendUser() {
+		if (!await this.getConfirmed(this.$t('unsuspend-confirm'))) return;
+
+		this.unsuspending = true;
+
+		const process = async () => {
+			await this.$root.api('admin/unsuspend-user', { userId: this.user!.id });
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('unsuspended')
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+
+		this.unsuspending = false;
+
+		this.refreshUser();
+	}
+
+	public async updateRemoteUser() {
+		this.$root.api('admin/update-remote-user', { userId: this.user!.id }).then(res => {
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('remote-user-updated')
+			});
+		});
+
+		this.refreshUser();
+	}
+
+	public async deleteAllFiles() {
+		if (!await this.getConfirmed(this.$t('delete-all-files-confirm'))) return;
+
+		const process = async () => {
+			await this.$root.api('admin/delete-all-files-of-a-user', { userId: this.user!.id });
+			this.$root.dialog({
+				type: 'success',
+				splash: true
+			});
+		};
+
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
+			});
+		});
+	}
+
+	public async getConfirmed(text: TranslateResult): Promise<boolean> {
+		const confirm = await this.$root.dialog({
+			type: 'warning',
+			showCancelButton: true,
+			title: 'confirm',
+			text,
+		});
+
+		return !confirm.canceled;
+	}
+
+	public fetchUsers(truncate = false) {
+		if (truncate) this.offset = 0;
+		this.$root.api('admin/show-users', {
+			state: this.state,
+			origin: this.origin,
+			sort: this.sort,
+			offset: this.offset,
+			limit: this.limit + 1,
+			username: this.searchUsername,
+			hostname: this.searchHost
+		}).then(users => {
+			if (users.length == this.limit + 1) {
+				users.pop();
+				this.existMore = true;
+			} else {
+				this.existMore = false;
+			}
+			this.users = truncate ? users : this.users.concat(users);
+			this.offset += this.limit;
+		});
 	}
 }
 </script>

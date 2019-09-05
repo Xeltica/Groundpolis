@@ -26,20 +26,21 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons';
 import { faSnowflake } from '@fortawesome/free-regular-svg-icons';
+import { User } from '../../../../models/entities/user';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/users.vue'),
-	props: ['user', 'click'],
-	data() {
-		return {
-			faSnowflake, faMicrophoneSlash
-		};
-	},
+})
+export default class UsersUser extends Vue {
+	@Prop() private user: User;
+	@Prop() private click: (userId: string) => void;
+
+	private faSnowflake = faSnowflake;
+	private faMicrophoneSlash = faMicrophoneSlash;
 }
 </script>
 

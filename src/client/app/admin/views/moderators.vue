@@ -43,28 +43,25 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
-import parseAcct from "../../../../misc/acct/parse";
+import parseAcct from '../../../../misc/acct/parse';
+import { ModerationLog } from '../../../../models/entities/moderation-log';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/moderators.vue'),
+})
+export default class Moderators extends Vue {
 
-	data() {
-		return {
-			username: '',
-			changing: false,
-			logs: [],
-			untilLogId: null,
-			existMoreLogs: false
-		};
-	},
+	private username = '';
+	private changing = false;
+	private logs: ModerationLog[];
+	private untilLogId: string;
+	private existMoreLogs = false;
 
-	created() {
+	public created() {
 		this.fetchLogs();
-	},
+	}
 
-	methods: {
-		async add() {
+		public async add() {
 			this.changing = true;
 
 			const process = async () => {
@@ -84,9 +81,9 @@ export default class Vm extends Vue {
 			});
 
 			this.changing = false;
-		},
+		}
 
-		async remove() {
+		public async remove() {
 			this.changing = true;
 
 			const process = async () => {
@@ -106,13 +103,13 @@ export default class Vm extends Vue {
 			});
 
 			this.changing = false;
-		},
+		}
 
-		fetchLogs() {
+		public fetchLogs() {
 			this.$root.api('admin/show-moderation-logs', {
-				untilId: this.untilId,
+				untilId: this.untilLogId,
 				limit: 10 + 1
-			}).then(logs => {
+			}).then((logs: ModerationLog[]) => {
 				if (logs.length == 10 + 1) {
 					logs.pop();
 					this.existMoreLogs = true;
@@ -122,7 +119,6 @@ export default class Vm extends Vue {
 				this.logs = this.logs.concat(logs);
 				this.untilLogId = this.logs[this.logs.length - 1].id;
 			});
-		},
-	}
+		}
 }
 </script>

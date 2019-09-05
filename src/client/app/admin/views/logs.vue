@@ -34,63 +34,59 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import { faStream } from '@fortawesome/free-solid-svg-icons';
 import VueJsonPretty from 'vue-json-pretty';
+import { Log } from '../../../../models/entities/log';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/logs.vue'),
 
 	components: {
 		VueJsonPretty
 	},
+})
+export default class Logs extends Vue {
 
-	data() {
-		return {
-			logs: [],
-			level: 'all',
-			domain: '',
-			faStream
-		};
-	},
+	private logs: Log[] = [];
+	private level = 'all';
+	private domain = '';
+	private faStream = faStream;
 
-	watch: {
-		level() {
-			this.logs = [];
-			this.fetch();
-		},
-
-		domain() {
-			this.logs = [];
-			this.fetch();
-		}
-	},
-
-	mounted() {
+	@Watch('level')
+	public watchLevel() {
+		this.logs = [];
 		this.fetch();
-	},
+	}
 
-	methods: {
-		fetch() {
-			this.$root.api('admin/logs', {
-				level: this.level === 'all' ? null : this.level,
-				domain: this.domain === '' ? null : this.domain,
-				limit: 100
-			}).then(logs => {
-				this.logs = logs.reverse();
-			});
-		},
+	@Watch('domain')
+	public watchDomain() {
+		this.logs = [];
+		this.fetch();
+	}
 
-		deleteAll() {
-			this.$root.api('admin/delete-logs').then(() => {
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
+	public mounted() {
+		this.fetch();
+	}
+
+	public fetch() {
+		this.$root.api('admin/logs', {
+			level: this.level === 'all' ? null : this.level,
+			domain: this.domain === '' ? null : this.domain,
+			limit: 100
+		}).then(logs => {
+			this.logs = logs.reverse();
+		});
+	}
+
+	public deleteAll() {
+		this.$root.api('admin/delete-logs').then(() => {
+			this.$root.dialog({
+				type: 'success',
+				splash: true
 			});
-		}
+		});
 	}
 }
 </script>

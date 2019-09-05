@@ -28,68 +28,57 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import ApexCharts from 'apexcharts';
 import * as tinycolor from 'tinycolor2';
 import { faStopwatch, faPlayCircle as fasPlayCircle } from '@fortawesome/free-solid-svg-icons';
 import { faStopCircle, faPlayCircle as farPlayCircle } from '@fortawesome/free-regular-svg-icons';
+import { Connection } from '../../common/scripts/Connection';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/queue.vue'),
+})
+export default class QueueChart extends Vue {
+	@Prop() private type!: string;
 
-	props: {
-		type: {
-			type: String,
-			required: true
-		},
-		connection: {
-			required: true
-		},
-		limit: {
-			type: Number,
-			required: true
-		}
-	},
+	@Prop() private connection!: Connection;
 
-	data() {
-		return {
-			stats: [],
-			chart: null,
-			faStopwatch, faStopCircle, farPlayCircle, fasPlayCircle
-		};
-	},
+	@Prop() private limit!: number;
 
-	computed: {
-		latestStats(): any {
-			return this.stats.length > 0 ? this.stats[this.stats.length - 1][this.type] : null;
-		}
-	},
+	private stats = [] as any[];
+	private chart: ApexCharts;
+	private faStopwatch = faStopwatch;
+	private faStopCircle = faStopCircle;
+	private farPlayCircle = farPlayCircle;
+	private fasPlayCircle = fasPlayCircle;
 
-	watch: {
-		stats(stats) {
-			this.chart.updateSeries([{
-				name: 'Process',
-				type: 'area',
-				data: stats.map((x, i) => ({ x: i, y: x[this.type].activeSincePrevTick }))
-			}, {
-				name: 'Active',
-				type: 'area',
-				data: stats.map((x, i) => ({ x: i, y: x[this.type].active }))
-			}, {
-				name: 'Waiting',
-				type: 'line',
-				data: stats.map((x, i) => ({ x: i, y: x[this.type].waiting }))
-			}, {
-				name: 'Delayed',
-				type: 'line',
-				data: stats.map((x, i) => ({ x: i, y: x[this.type].delayed }))
-			}]);
-		},
-	},
+	public latestStats(): any {
+		return this.stats.length > 0 ? this.stats[this.stats.length - 1][this.type] : null;
+	}
 
-	mounted() {
+	@Watch('stats')
+	public watchStats(stats) {
+		this.chart.updateSeries([{
+			name: 'Process',
+			type: 'area',
+			data: stats.map((x, i) => ({ x: i, y: x[this.type].activeSincePrevTick }))
+		}, {
+			name: 'Active',
+			type: 'area',
+			data: stats.map((x, i) => ({ x: i, y: x[this.type].active }))
+		}, {
+			name: 'Waiting',
+			type: 'line',
+			data: stats.map((x, i) => ({ x: i, y: x[this.type].waiting }))
+		}, {
+			name: 'Delayed',
+			type: 'line',
+			data: stats.map((x, i) => ({ x: i, y: x[this.type].delayed }))
+		}]);
+	}
+
+	public mounted() {
 		this.chart = new ApexCharts(this.$refs.chart, {
 			chart: {
 				id: this.type,
@@ -157,19 +146,17 @@ export default class Vm extends Vue {
 		this.$once('hook:beforeDestroy', () => {
 			if (this.chart) this.chart.destroy();
 		});
-	},
+	}
 
-	methods: {
-		onStats(stats) {
-			this.stats.push(stats);
-			if (this.stats.length > this.limit) this.stats.shift();
-		},
+	public onStats(stats) {
+		this.stats.push(stats);
+		if (this.stats.length > this.limit) this.stats.shift();
+	}
 
-		onStatsLog(statsLog) {
-			for (const stats of statsLog.reverse()) {
-				this.onStats(stats);
-			}
-		},
+	public onStatsLog(statsLog) {
+		for (const stats of statsLog.reverse()) {
+			this.onStats(stats);
+		}
 	}
 }
 </script>

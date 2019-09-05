@@ -48,7 +48,7 @@
 				</ui-select>
 			</ui-horizon-group>
 			<sequential-entrance animation="entranceFromTop" delay="25">
-				<div class="xvvuvgsv" v-for="job in jobs">
+				<div class="xvvuvgsv" v-for="job in jobs" :key="job.id">
 					<b>{{ job.id }}</b>
 					<template v-if="domain === 'deliver'">
 						<span>{{ job.data.to }}</span>
@@ -65,45 +65,49 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import { faTasks, faInbox, faDatabase, faCloud } from '@fortawesome/free-solid-svg-icons';
 import { faPaperPlane, faChartBar } from '@fortawesome/free-regular-svg-icons';
 import i18n from '../../i18n';
 import XChart from './queue.chart.vue';
+import { Connection } from '../../common/scripts/Connection';
+import { Job } from 'bull';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('admin/views/queue.vue'),
 
 	components: {
 		XChart
 	},
+})
+export default class Queue extends Vue {
 
-	data() {
-		return {
-			connection: null,
-			chartLimit: 200,
-			jobs: [],
-			jobsLimit: 50,
-			domain: 'deliver',
-			state: 'delayed',
-			faTasks, faPaperPlane, faInbox, faChartBar, faDatabase, faCloud
-		};
-	},
+	private connection: Connection;
+	private chartLimit = 200;
+	private jobs: Job[];
+	private jobsLimit = 50;
+	private domain = 'deliver';
+	private state = 'delayed';
+	private faTasks = faTasks;
+	private faPaperPlane = faPaperPlane;
+	private faInbox = faInbox;
+	private faChartBar = faChartBar;
+	private faDatabase = faDatabase;
+	private faCloud = faCloud;
 
-	watch: {
-		domain() {
-			this.jobs = [];
-			this.fetchJobs();
-		},
+	@Watch('domain')
+	public watchDomain() {
+		this.jobs = [];
+		this.fetchJobs();
+	}
 
-		state() {
-			this.jobs = [];
-			this.fetchJobs();
-		},
-	},
+	@Watch('state')
+	public watchState() {
+		this.jobs = [];
+		this.fetchJobs();
+	}
 
-	mounted() {
+	public mounted() {
 		this.fetchJobs();
 
 		this.connection = this.$root.stream.useSharedConnection('queueStats');
@@ -115,35 +119,33 @@ export default class Vm extends Vue {
 		this.$once('hook:beforeDestroy', () => {
 			this.connection.dispose();
 		});
-	},
+	}
 
-	methods: {
-		async removeAllJobs() {
-			const process = async () => {
-				await this.$root.api('admin/queue/clear');
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			};
-
-			await process().catch(e => {
-				this.$root.dialog({
-					type: 'error',
-					text: e.message
-				});
+	public async removeAllJobs() {
+		const process = async () => {
+			await this.$root.api('admin/queue/clear');
+			this.$root.dialog({
+				type: 'success',
+				splash: true
 			});
-		},
+		};
 
-		fetchJobs() {
-			this.$root.api('admin/queue/jobs', {
-				domain: this.domain,
-				state: this.state,
-				limit: this.jobsLimit
-			}).then(jobs => {
-				this.jobs = jobs;
+		await process().catch(e => {
+			this.$root.dialog({
+				type: 'error',
+				text: e.message
 			});
-		},
+		});
+	}
+
+	public fetchJobs() {
+		this.$root.api('admin/queue/jobs', {
+			domain: this.domain,
+			state: this.state,
+			limit: this.jobsLimit
+		}).then(jobs => {
+			this.jobs = jobs;
+		});
 	}
 }
 </script>
