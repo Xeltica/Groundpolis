@@ -27,40 +27,44 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import i18n from '../../i18n';
+import { AuthSession } from '../../../../models/entities/auth-session';
+import { App } from '../../../../models/entities/app';
 
-export default Vue.extend({
-	i18n: i18n('auth/views/form.vue'),
-	props: ['session'],
-	computed: {
-		name(): string {
-			const el = document.createElement('div');
-			el.textContent = this.app.name
-			return el.innerHTML;
-		},
-		app(): any {
-			return this.session.app;
-		}
-	},
-	methods: {
-		cancel() {
-			this.$root.api('auth/deny', {
-				token: this.session.token
-			}).then(() => {
-				this.$emit('denied');
-			});
-		},
+@Component({
+		i18n: i18n('auth/views/form.vue'),
+})
+export default class Form extends Vue {
+	@Prop() private session!: AuthSession;
 
-		accept() {
-			this.$root.api('auth/accept', {
-				token: this.session.token
-			}).then(() => {
-				this.$emit('accepted');
-			});
-		}
+
+	public get name(): string {
+		const el = document.createElement('div');
+		el.textContent = this.app!.name;
+		return el.innerHTML;
 	}
-});
+
+	public get app(): App | null {
+		return this.session.app;
+	}
+
+	public cancel() {
+		this.$root.api('auth/deny', {
+			token: this.session.token
+		}).then(() => {
+			this.$emit('denied');
+		});
+	}
+
+	public accept() {
+		this.$root.api('auth/accept', {
+			token: this.session.token
+		}).then(() => {
+			this.$emit('accepted');
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

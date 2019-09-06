@@ -35,25 +35,24 @@
 import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../i18n';
 import XForm from './form.vue';
+import { AuthSession } from '../../../../models/entities/auth-session';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('auth/views/index.vue'),
 	components: {
 		XForm
 	},
-	data() {
-		return {
-			state: null,
-			session: null,
-			fetching: true
-		};
-	},
-	computed: {
-		token(): string {
-			return this.$route.params.token;
-		}
-	},
-	mounted() {
+})
+export default class Index extends Vue {
+	private state: string;
+	private session: AuthSession;
+	private fetching = true;
+
+	public token(): string {
+		return this.$route.params.token;
+	}
+
+	public mounted() {
 		if (!this.$store.getters.isSignedIn) return;
 
 		// Fetch session
@@ -63,30 +62,20 @@ export default Vue.extend({
 			this.session = session;
 			this.fetching = false;
 
-			// 既に連携していた場合
-			if (this.session.app.isAuthorized) {
-				this.$root.api('auth/accept', {
-					token: this.session.token
-				}).then(() => {
-					this.accepted();
-				});
-			} else {
-				this.state = 'waiting';
-			}
+			this.state = 'waiting';
 		}).catch(error => {
 			this.state = 'fetch-session-error';
 			this.fetching = false;
 		});
-	},
-	methods: {
-		accepted() {
-			this.state = 'accepted';
-			if (this.session.app.callbackUrl) {
-				location.href = `${this.session.app.callbackUrl}?token=${this.session.token}`;
-			}
+	}
+
+	public accepted() {
+		this.state = 'accepted';
+		if (this.session.app!.callbackUrl) {
+			location.href = `${this.session.app!.callbackUrl}?token=${this.session.token}`;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>
