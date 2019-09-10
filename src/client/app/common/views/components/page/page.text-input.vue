@@ -5,31 +5,21 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		}
-	},
+@Component
+export default class XTextInput extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly script;
 
-	data() {
-		return {
-			v: this.value.default,
-		};
-	},
+	private v = this.value.default;
 
-	watch: {
-		v() {
-			this.script.aiScript.updatePageVar(this.value.name, this.v);
-			this.script.eval();
-		}
+	@Watch('v')
+	public watchV() {
+		this.script.aiScript.updatePageVar(this.value.name, this.v);
+		this.script.eval();
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

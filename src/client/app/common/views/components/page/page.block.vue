@@ -18,24 +18,27 @@ import XPost from './page.post.vue';
 import XCounter from './page.counter.vue';
 import XRadioButton from './page.radio-button.vue';
 
-export default Vue.extend({
+@Component({
 	components: {
-		XText, XSection, XImage, XButton, XNumberInput, XTextInput, XTextareaInput, XTextarea, XPost, XSwitch, XIf, XCounter, XRadioButton
+		XText,
+		XSection,
+		XImage,
+		XButton,
+		XNumberInput,
+		XTextInput,
+		XTextareaInput,
+		XTextarea,
+		XPost,
+		XSwitch,
+		XIf,
+		XCounter,
+		XRadioButton,
 	},
-
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		},
-		page: {
-			required: true
-		},
-		h: {
-			required: true
-		}
-	},
-});
+})
+export default class XBlock extends Vue {
+	private readonly value;
+	private readonly script;
+	private readonly page;
+	private readonly h;
+}
 </script>

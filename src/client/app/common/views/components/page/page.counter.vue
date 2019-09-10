@@ -5,37 +5,25 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		}
-	},
+@Component
+export default class XCounter extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly script;
 
-	data() {
-		return {
-			v: 0,
-		};
-	},
+	private v = 0;
 
-	watch: {
-		v() {
-			this.script.aiScript.updatePageVar(this.value.name, this.v);
-			this.script.eval();
-		}
-	},
-
-	methods: {
-		click() {
-			this.v = this.v + (this.value.inc || 1);
-		}
+	@Watch('v')
+	public watchV() {
+		this.script.aiScript.updatePageVar(this.value.name, this.v);
+		this.script.eval();
 	}
-});
+
+	public click() {
+		this.v = this.v + (this.value.inc || 1);
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

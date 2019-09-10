@@ -6,50 +6,39 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('pages'),
+})
+export default class XPost extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly script;
 
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		}
-	},
+	private text = this.script.interpolate(this.value.text);
+	private posted = false;
+	private posting = false;
 
-	data() {
-		return {
-			text: this.script.interpolate(this.value.text),
-			posted: false,
-			posting: false,
-		};
-	},
-
-	created() {
+	public created() {
 		this.$watch('script.vars', () => {
 			this.text = this.script.interpolate(this.value.text);
 		}, { deep: true });
-	},
-
-	methods: {
-		post() {
-			this.posting = true;
-			this.$root.api('notes/create', {
-				text: this.text,
-			}).then(() => {
-				this.posted = true;
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			});
-		}
 	}
-});
+
+	public post() {
+		this.posting = true;
+		this.$root.api('notes/create', {
+			text: this.text,
+		}).then(() => {
+			this.posted = true;
+			this.$root.dialog({
+				type: 'success',
+				splash: true
+			});
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

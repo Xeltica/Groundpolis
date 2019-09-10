@@ -7,46 +7,35 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { parse } from '../../../../../../mfm/parse';
 import { unique } from '../../../../../../prelude/array';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
+@Component
+export default class XText extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly script;
+
+	private text = this.script.interpolate(this.value.text);
+
+	public urls(): string[] {
+		if (this.text) {
+			const ast = parse(this.text);
+			// TODO: 再帰的にURL要素がないか調べる
+			return unique(ast!
+				.filter(t => ((t.node.type == 'url' || t.node.type == 'link') && t.node.props.url && !t.node.props.silent))
+				.map(t => t.node.props.url));
+		} else {
+			return [];
 		}
-	},
+	}
 
-	data() {
-		return {
-			text: this.script.interpolate(this.value.text),
-		};
-	},
-
-	computed: {
-		urls(): string[] {
-			if (this.text) {
-				const ast = parse(this.text);
-				// TODO: 再帰的にURL要素がないか調べる
-				return unique(ast
-					.filter(t => ((t.node.type == 'url' || t.node.type == 'link') && t.node.props.url && !t.node.props.silent))
-					.map(t => t.node.props.url));
-			} else {
-				return [];
-			}
-		}
-	},
-
-	created() {
+	public created() {
 		this.$watch('script.vars', () => {
 			this.text = this.script.interpolate(this.value.text);
 		}, { deep: true });
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

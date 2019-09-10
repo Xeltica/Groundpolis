@@ -7,7 +7,8 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-export default Vue.extend({
+@Component
+export default class XTextareaInput extends Vue {
 	props: {
 		value: {
 			required: true
@@ -29,7 +30,7 @@ export default Vue.extend({
 			this.script.eval();
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

@@ -5,28 +5,19 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: true
-		},
-		page: {
-			required: true
-		},
-	},
+@Component
+export default class Vm extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly page;
 
-	data() {
-		return {
-			image: null,
-		};
-	},
+	private image;
 
-	created() {
+	public created() {
 		this.image = this.page.attachedFiles.find(x => x.id === this.value.fileId);
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

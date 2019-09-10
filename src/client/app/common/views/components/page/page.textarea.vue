@@ -3,30 +3,21 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		}
-	},
+@Component
+export default class Textarea extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly script;
 
-	data() {
-		return {
-			text: this.script.interpolate(this.value.text),
-		};
-	},
+	private v = this.value.default;
 
-	created() {
-		this.$watch('script.vars', () => {
-			this.text = this.script.interpolate(this.value.text);
-		}, { deep: true });
+	@Watch('v')
+	public watchV() {
+		this.script.aiScript.updatePageVar(this.value.name, this.v);
+		this.script.eval();
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

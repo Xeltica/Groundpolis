@@ -26,14 +26,14 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import { faHeart as faHeartS } from '@fortawesome/free-solid-svg-icons';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
 import XBlock from './page.block.vue';
 import { ASEvaluator } from '../../../../../../misc/aiscript/evaluator';
 import { collectPageVars } from '../../../scripts/collect-page-vars';
-import { url } from '../../../../config';
+import { url, version } from '../../../../config';
 
 class Script {
 	public aiScript: ASEvaluator;
@@ -65,85 +65,69 @@ class Script {
 	}
 }
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('pages'),
 
 	components: {
 		XBlock
 	},
+})
+export default class Vm extends Vue {
+	@Prop() private page;
+	@Prop({	default: true }) private showTitle: boolean;
+	@Prop({	default: false }) private showFooter: boolean;
 
-	props: {
-		page: {
-			type: Object,
-			required: true
-		},
-		showTitle: {
-			type: Boolean,
-			required: false,
-			default: true
-		},
-		showFooter: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-	},
+	private script;
+	private faHeartS = faHeartS;
+	private faHeart = faHeart;
 
-	data() {
-		return {
-			script: null,
-			faHeartS, faHeart
-		};
-	},
-
-	created() {
+	public created() {
 		const pageVars = this.getPageVars();
 		this.script = new Script(this.page, new ASEvaluator(this.page.variables, pageVars, {
-			randomSeed: Math.random(),
+			randomSeed: Math.random().toString(),
 			user: this.page.user,
 			visitor: this.$store.state.i,
 			page: this.page,
-			url: url
+			url,
+			version,
 		}), e => {
 			console.dir(e);
 		});
-	},
-
-	methods: {
-		getPageVars() {
-			return collectPageVars(this.page.content);
-		},
-
-		like() {
-			this.$root.api('pages/like', {
-				pageId: this.page.id,
-			}).then(() => {
-				this.page.isLiked = true;
-				this.page.likedCount++;
-			});
-		},
-
-		unlike() {
-			this.$root.api('pages/unlike', {
-				pageId: this.page.id,
-			}).then(() => {
-				this.page.isLiked = false;
-				this.page.likedCount--;
-			});
-		},
-
-		pin(pin) {
-			this.$root.api('i/update', {
-				pinnedPageId: pin ? this.page.id : null,
-			}).then(() => {
-				this.$root.dialog({
-					type: 'success',
-					splash: true
-				});
-			});
-		}
 	}
-});
+
+	public getPageVars() {
+		return collectPageVars(this.page.content);
+	}
+
+	public like() {
+		this.$root.api('pages/like', {
+			pageId: this.page.id,
+		}).then(() => {
+			this.page.isLiked = true;
+			this.page.likedCount++;
+		});
+	}
+
+	public unlike() {
+		this.$root.api('pages/unlike', {
+			pageId: this.page.id,
+		}).then(() => {
+			this.page.isLiked = false;
+			this.page.likedCount--;
+		});
+	}
+
+	public pin(pin) {
+		this.$root.api('i/update', {
+			pinnedPageId: pin ? this.page.id : null,
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				splash: true
+			});
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

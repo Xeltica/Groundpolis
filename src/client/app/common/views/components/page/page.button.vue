@@ -5,45 +5,38 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		}
-	},
+@Component
+export default class XButton extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly script;
 
-	methods: {
-		click() {
-			if (this.value.action === 'dialog') {
-				this.script.eval();
-				this.$root.dialog({
-					text: this.script.interpolate(this.value.content)
-				});
-			} else if (this.value.action === 'resetRandom') {
-				this.script.aiScript.updateRandomSeed(Math.random());
-				this.script.eval();
-			} else if (this.value.action === 'pushEvent') {
-				this.$root.api('page-push', {
-					pageId: this.script.page.id,
-					event: this.value.event,
-					...(this.value.var ? {
-						var: this.script.vars[this.value.var]
-					} : {})
-				});
+	public click() {
+		if (this.value.action === 'dialog') {
+			this.script.eval();
+			this.$root.dialog({
+				text: this.script.interpolate(this.value.content)
+			});
+		} else if (this.value.action === 'resetRandom') {
+			this.script.aiScript.updateRandomSeed(Math.random());
+			this.script.eval();
+		} else if (this.value.action === 'pushEvent') {
+			this.$root.api('page-push', {
+				pageId: this.script.page.id,
+				event: this.value.event,
+				...(this.value.var ? {
+					var: this.script.vars[this.value.var]
+				} : {})
+			});
 
-				this.$root.dialog({
-					type: 'success',
-					text: this.script.interpolate(this.value.message)
-				});
-			}
+			this.$root.dialog({
+				type: 'success',
+				text: this.script.interpolate(this.value.message)
+			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

@@ -9,28 +9,19 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		},
-		page: {
-			required: true
-		},
-		h: {
-			required: true
-		}
-	},
+@Component
+export default class XSection extends Vue {
+	@Prop() private readonly value;
+	@Prop() private readonly script;
+	@Prop() private readonly page;
+	@Prop() private readonly h;
 
-	beforeCreate() {
-		this.$options.components.XBlock = require('./page.block.vue').default
-	},
-});
+	public beforeCreate() {
+		this.$options.components!.XBlock = require('./page.block.vue').default;
+	}
+}
 </script>
 
 <style lang="stylus" scoped>
