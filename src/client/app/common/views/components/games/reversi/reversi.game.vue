@@ -24,14 +24,15 @@
 
 	<div class="board">
 		<div class="labels-x" v-if="$store.state.settings.gamesReversiShowBoardLabels">
-			<span v-for="i in game.map[0].length">{{ String.fromCharCode(64 + i) }}</span>
+			<span v-for="i in game.map[0].length" :key="i">{{ String.fromCharCode(64 + i) }}</span>
 		</div>
 		<div class="flex">
 			<div class="labels-y" v-if="$store.state.settings.gamesReversiShowBoardLabels">
-				<div v-for="i in game.map.length">{{ i }}</div>
+				<div v-for="i in game.map.length" :key="i">{{ i }}</div>
 			</div>
 			<div class="cells" :style="cellsStyle">
 				<div v-for="(stone, i) in o.board"
+						:key="i"
 						:class="{ empty: stone == null, none: o.map[i] == 'null', isEnded: game.isEnded, myTurn: !game.isEnded && isMyTurn, can: turnUser ? o.canPut(turnUser.id == blackUser.id, i) : null, prev: o.prevPos == i }"
 						@click="set(i)"
 						:title="`${String.fromCharCode(65 + o.transformPosToXy(i)[0])}${o.transformPosToXy(i)[1] + 1}`">
@@ -46,11 +47,11 @@
 				</div>
 			</div>
 			<div class="labels-y" v-if="this.$store.state.settings.gamesReversiShowBoardLabels">
-				<div v-for="i in game.map.length">{{ i }}</div>
+				<div v-for="i in game.map.length" :key="i">{{ i }}</div>
 			</div>
 		</div>
 		<div class="labels-x" v-if="this.$store.state.settings.gamesReversiShowBoardLabels">
-			<span v-for="i in game.map[0].length">{{ String.fromCharCode(64 + i) }}</span>
+			<span v-for="i in game.map[0].length" :key="i">{{ String.fromCharCode(64 + i) }}</span>
 		</div>
 	</div>
 
@@ -79,7 +80,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import i18n from '../../../../../i18n';
 import * as CRC32 from 'crc-32';
 import Reversi, { Color } from '../../../../../../../games/reversi/core';
@@ -87,101 +88,91 @@ import { url } from '../../../../../config';
 import { faAngleDoubleLeft, faAngleLeft, faAngleRight, faAngleDoubleRight } from '@fortawesome/free-solid-svg-icons';
 import { faCircle as fasCircle } from '@fortawesome/free-solid-svg-icons';
 import { faCircle as farCircle } from '@fortawesome/free-regular-svg-icons';
+import { Connection } from '../../../../scripts/Connection';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/games/reversi/reversi.game.vue'),
-	props: {
-		initGame: {
-			type: Object,
-			require: true
-		},
-		connection: {
-			type: Object,
-			require: true
-		},
-		selfNav: {
-			type: Boolean,
-			require: true
-		}
-	},
+})
+export default class ReversiGame extends Vue {
+	@Prop() private readonly initGame!: any;
+	@Prop() private readonly connection!: Connection;
+	@Prop() private readonly selfNav!: true;
 
-	data() {
-		return {
-			game: null,
-			o: null as Reversi,
-			logs: [],
-			logPos: 0,
-			pollingClock: null,
-			faAngleDoubleLeft, faAngleLeft, faAngleRight, faAngleDoubleRight, fasCircle, farCircle
-		};
-	},
+	private game: any;
+	private o: Reversi;
+	private logs = [] as any[];
+	private logPos = 0;
+	private pollingClock: number;
+	private faAngleDoubleLeft = faAngleDoubleLeft;
+	private faAngleLeft = faAngleLeft;
+	private faAngleRight = faAngleRight;
+	private faAngleDoubleRight = faAngleDoubleRight;
+	private fasCircle = fasCircle;
+	private farCircle = farCircle;
 
-	computed: {
-		iAmPlayer(): boolean {
-			if (!this.$store.getters.isSignedIn) return false;
-			return this.game.user1Id == this.$store.state.i.id || this.game.user2Id == this.$store.state.i.id;
-		},
+	public get iAmPlayer(): boolean {
+		if (!this.$store.getters.isSignedIn) return false;
+		return this.game.user1Id == this.$store.state.i.id || this.game.user2Id == this.$store.state.i.id;
+	}
 
-		myColor(): Color {
-			if (!this.iAmPlayer) return null;
-			if (this.game.user1Id == this.$store.state.i.id && this.game.black == 1) return true;
-			if (this.game.user2Id == this.$store.state.i.id && this.game.black == 2) return true;
-			return false;
-		},
+	public get myColor(): Color | null {
+		if (!this.iAmPlayer) return null;
+		if (this.game.user1Id == this.$store.state.i.id && this.game.black == 1) return true;
+		if (this.game.user2Id == this.$store.state.i.id && this.game.black == 2) return true;
+		return false;
+	}
 
-		opColor(): Color {
-			if (!this.iAmPlayer) return null;
-			return this.myColor === true ? false : true;
-		},
+	public get opColor(): Color | null {
+		if (!this.iAmPlayer) return null;
+		return this.myColor !== true;
+	}
 
-		blackUser(): any {
+	public get blackUser(): any {
+		return this.game.black == 1 ? this.game.user1 : this.game.user2;
+	}
+
+	public get whiteUser(): any {
+		return this.game.black == 1 ? this.game.user2 : this.game.user1;
+	}
+
+	public get turnUser(): any {
+		if (this.o.turn === true) {
 			return this.game.black == 1 ? this.game.user1 : this.game.user2;
-		},
-
-		whiteUser(): any {
+		} else if (this.o.turn === false) {
 			return this.game.black == 1 ? this.game.user2 : this.game.user1;
-		},
-
-		turnUser(): any {
-			if (this.o.turn === true) {
-				return this.game.black == 1 ? this.game.user1 : this.game.user2;
-			} else if (this.o.turn === false) {
-				return this.game.black == 1 ? this.game.user2 : this.game.user1;
-			} else {
-				return null;
-			}
-		},
-
-		isMyTurn(): boolean {
-			if (!this.iAmPlayer) return false;
-			if (this.turnUser == null) return false;
-			return this.turnUser.id == this.$store.state.i.id;
-		},
-
-		cellsStyle(): any {
-			return {
-				'grid-template-rows': `repeat(${this.game.map.length}, 1fr)`,
-				'grid-template-columns': `repeat(${this.game.map[0].length}, 1fr)`
-			};
+		} else {
+			return null;
 		}
-	},
+	}
 
-	watch: {
-		logPos(v) {
-			if (!this.game.isEnded) return;
-			this.o = new Reversi(this.game.map, {
-				isLlotheo: this.game.isLlotheo,
-				canPutEverywhere: this.game.canPutEverywhere,
-				loopedBoard: this.game.loopedBoard
-			});
-			for (const log of this.logs.slice(0, v)) {
-				this.o.put(log.color, log.pos);
-			}
-			this.$forceUpdate();
+	public get isMyTurn(): boolean {
+		if (!this.iAmPlayer) return false;
+		if (this.turnUser == null) return false;
+		return this.turnUser.id == this.$store.state.i.id;
+	}
+
+	public get cellsStyle(): any {
+		return {
+			'grid-template-rows': `repeat(${this.game.map.length}, 1fr)`,
+			'grid-template-columns': `repeat(${this.game.map[0].length}, 1fr)`
+		};
+	}
+
+	@Watch('logPos')
+	public watchLogPos(v) {
+		if (!this.game.isEnded) return;
+		this.o = new Reversi(this.game.map, {
+			isLlotheo: this.game.isLlotheo,
+			canPutEverywhere: this.game.canPutEverywhere,
+			loopedBoard: this.game.loopedBoard
+		});
+		for (const log of this.logs.slice(0, v)) {
+			this.o.put(log.color, log.pos);
 		}
-	},
+		this.$forceUpdate();
+	}
 
-	created() {
+	public created() {
 		this.game = this.initGame;
 
 		this.o = new Reversi(this.game.map, {
@@ -199,7 +190,7 @@ export default Vue.extend({
 
 		// 通信を取りこぼしてもいいように定期的にポーリングさせる
 		if (this.game.isStarted && !this.game.isEnded) {
-			this.pollingClock = setInterval(() => {
+			this.pollingClock = window.setInterval(() => {
 				if (this.game.isEnded) return;
 				const crc32 = CRC32.str(this.logs.map(x => x.pos.toString()).join(''));
 				this.connection.send('check', {
@@ -207,30 +198,29 @@ export default Vue.extend({
 				});
 			}, 3000);
 		}
-	},
+	}
 
-	mounted() {
+	public mounted() {
 		this.connection.on('set', this.onSet);
 		this.connection.on('rescue', this.onRescue);
 		this.connection.on('ended', this.onEnded);
-	},
+	}
 
-	beforeDestroy() {
+	public beforeDestroy() {
 		this.connection.off('set', this.onSet);
 		this.connection.off('rescue', this.onRescue);
 		this.connection.off('ended', this.onEnded);
 
 		clearInterval(this.pollingClock);
-	},
+	}
 
-	methods: {
-		set(pos) {
+		public set(pos) {
 			if (this.game.isEnded) return;
 			if (!this.iAmPlayer) return;
 			if (!this.isMyTurn) return;
-			if (!this.o.canPut(this.myColor, pos)) return;
+			if (!this.o.canPut(this.myColor!, pos)) return;
 
-			this.o.put(this.myColor, pos);
+			this.o.put(this.myColor!, pos);
 
 			// サウンドを再生する
 			if (this.$store.state.device.enableSounds) {
@@ -246,9 +236,9 @@ export default Vue.extend({
 			this.checkEnd();
 
 			this.$forceUpdate();
-		},
+		}
 
-		onSet(x) {
+		public onSet(x) {
 			this.logs.push(x);
 			this.logPos++;
 			this.o.put(x.color, x.pos);
@@ -261,13 +251,13 @@ export default Vue.extend({
 				sound.volume = this.$store.state.device.soundVolume;
 				sound.play();
 			}
-		},
+		}
 
-		onEnded(x) {
+		public onEnded(x) {
 			this.game = x.game;
-		},
+		}
 
-		checkEnd() {
+		public checkEnd() {
 			this.game.isEnded = this.o.isEnded;
 			if (this.game.isEnded) {
 				if (this.o.winner === true) {
@@ -281,10 +271,10 @@ export default Vue.extend({
 					this.game.winner = null;
 				}
 			}
-		},
+		}
 
 		// 正しいゲーム情報が送られてきたとき
-		onRescue(game) {
+		public onRescue(game) {
 			this.game = game;
 
 			this.o = new Reversi(this.game.map, {
@@ -294,7 +284,7 @@ export default Vue.extend({
 			});
 
 			for (const log of this.game.logs) {
-				this.o.put(log.color, log.pos, true);
+				this.o.put(log.color, log.pos);
 			}
 
 			this.logs = this.game.logs;
@@ -302,19 +292,18 @@ export default Vue.extend({
 
 			this.checkEnd();
 			this.$forceUpdate();
-		},
+		}
 
-		surrender() {
+		public surrender() {
 			this.$root.api('games/reversi/games/surrender', {
 				gameId: this.game.id
 			});
-		},
+		}
 
-		goIndex() {
+		public goIndex() {
 			this.$emit('go-index');
 		}
-	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>
