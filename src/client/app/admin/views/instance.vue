@@ -255,79 +255,78 @@ import { Meta } from '../../../../models/entities/meta';
 	i18n: i18n('admin/views/instance.vue'),
 })
 export default class Instance extends Vue {
+	private url = url;
+	private host = toUnicode(host);
+	private maintainerName: string | null;
+	private maintainerEmail: string | null;
+	private ToSUrl: string | null;
+	private repositoryUrl = 'https://github.com/xeltica/groundpolis';
+	private feedbackUrl: string | null;
+	private disableRegistration = false;
+	private disableLocalTimeline = false;
+	private disableGlobalTimeline = false;
+	private enableEmojiReaction = true;
+	private useStarForReactionFallback = false;
+	private mascotImageUrl: string | null;
+	private bannerUrl: string | null;
+	private errorImageUrl: string | null;
+	private iconUrl: string | null;
+	private name: string | null;
+	private description: string | null;
+	private languages: string | null;
+	private cacheRemoteFiles = false;
+	private localDriveCapacityMb: number;
+	private remoteDriveCapacityMb: number;
+	private maxNoteTextLength: number;
+	private enableRecaptcha = false;
+	private recaptchaSiteKey: string | null;
+	private recaptchaSecretKey: string | null;
+	private enableTwitterIntegration = false;
+	private twitterConsumerKey: string | null;
+	private twitterConsumerSecret: string | null;
+	private enableGithubIntegration = false;
+	private githubClientId: string | null;
+	private githubClientSecret: string | null;
+	private enableDiscordIntegration = false;
+	private discordClientId: string | null;
+	private discordClientSecret: string | null;
+	private proxyAccount: string | null;
+	private summalyProxy: string | null;
+	private enableEmail = false;
+	private email: string | null;
+	private smtpSecure = false;
+	private smtpHost: string | null;
+	private smtpPort: number | null;
+	private smtpUser: string | null;
+	private smtpPass: string | null;
+	private smtpAuth = false;
+	private enableServiceWorker = false;
+	private swPublicKey: string | null;
+	private swPrivateKey: string | null;
+	private pinnedUsers = '';
+	private hiddenTags = '';
+	private useObjectStorage = false;
+	private objectStorageBaseUrl: string | null;
+	private objectStorageBucket: string | null;
+	private objectStoragePrefix: string | null;
+	private objectStorageEndpoint: string | null;
+	private objectStorageRegion: string | null;
+	private objectStoragePort: number | null;
+	private objectStorageAccessKey: string | null;
+	private objectStorageSecretKey: string | null;
+	private objectStorageUseSSL = false;
+	private faHeadset = faHeadset;
+	private faShieldAlt = faShieldAlt;
+	private faGhost = faGhost;
+	private faUserPlus = faUserPlus;
+	private farEnvelope = farEnvelope;
+	private faBolt = faBolt;
+	private faThumbtack = faThumbtack;
+	private faPencilAlt = faPencilAlt;
+	private faSave = faSave;
+	private faHashtag = faHashtag;
 
-			private url = url;
-			private host = toUnicode(host);
-			private maintainerName: string | null;
-			private maintainerEmail: string | null;
-			private ToSUrl: string | null;
-			private repositoryUrl = 'https://github.com/xeltica/groundpolis';
-			private feedbackUrl: string | null;
-			private disableRegistration = false;
-			private disableLocalTimeline = false;
-			private disableGlobalTimeline = false;
-			private enableEmojiReaction = true;
-			private useStarForReactionFallback = false;
-			private mascotImageUrl: string | null;
-			private bannerUrl: string | null;
-			private errorImageUrl: string | null;
-			private iconUrl: string | null;
-			private name: string | null;
-			private description: string | null;
-			private languages: string | null;
-			private cacheRemoteFiles = false;
-			private localDriveCapacityMb: number;
-			private remoteDriveCapacityMb: number;
-			private maxNoteTextLength: number;
-			private enableRecaptcha = false;
-			private recaptchaSiteKey: string | null;
-			private recaptchaSecretKey: string | null;
-			private enableTwitterIntegration = false;
-			private twitterConsumerKey: string | null;
-			private twitterConsumerSecret: string | null;
-			private enableGithubIntegration = false;
-			private githubClientId: string | null;
-			private githubClientSecret: string | null;
-			private enableDiscordIntegration = false;
-			private discordClientId: string | null;
-			private discordClientSecret: string | null;
-			private proxyAccount: string | null;
-			private summalyProxy: string | null;
-			private enableEmail = false;
-			private email: string | null;
-			private smtpSecure = false;
-			private smtpHost: string | null;
-			private smtpPort: number | null;
-			private smtpUser: string | null;
-			private smtpPass: string | null;
-			private smtpAuth = false;
-			private enableServiceWorker = false;
-			private swPublicKey: string | null;
-			private swPrivateKey: string | null;
-			private pinnedUsers = '';
-			private hiddenTags = '';
-			private useObjectStorage = false;
-			private objectStorageBaseUrl: string | null;
-			private objectStorageBucket: string | null;
-			private objectStoragePrefix: string | null;
-			private objectStorageEndpoint: string | null;
-			private objectStorageRegion: string | null;
-			private objectStoragePort: number | null;
-			private objectStorageAccessKey: string | null;
-			private objectStorageSecretKey: string | null;
-			private objectStorageUseSSL = false;
-			private faHeadset = faHeadset;
-			private faShieldAlt = faShieldAlt;
-			private faGhost = faGhost;
-			private faUserPlus = faUserPlus;
-			private farEnvelope = farEnvelope;
-			private faBolt = faBolt;
-			private faThumbtack = faThumbtack;
-			private faPencilAlt = faPencilAlt;
-			private faSave = faSave;
-			private faHashtag = faHashtag;
-
-	created() {
+	public created() {
 		this.$root.getMeta(true).then((meta) => {
 			this.maintainerName = meta.maintainerName;
 			this.maintainerEmail = meta.maintainerEmail;
@@ -470,9 +469,9 @@ export default class Instance extends Vue {
 			description: this.description,
 			langs: this.languages!.split(' '),
 			cacheRemoteFiles: this.cacheRemoteFiles,
-			localDriveCapacityMb: this.localDriveCapacityMb,
-			remoteDriveCapacityMb: this.remoteDriveCapacityMb,
-			maxNoteTextLength: this.maxNoteTextLength,
+			localDriveCapacityMb: Math.floor(this.localDriveCapacityMb),
+			remoteDriveCapacityMb: Math.floor(this.remoteDriveCapacityMb),
+			maxNoteTextLength: Math.floor(this.maxNoteTextLength),
 			enableRecaptcha: this.enableRecaptcha,
 			recaptchaSiteKey: this.recaptchaSiteKey,
 			recaptchaSecretKey: this.recaptchaSecretKey,
@@ -490,7 +489,7 @@ export default class Instance extends Vue {
 			enableEmail: this.enableEmail,
 			email: this.email,
 			smtpSecure: this.smtpSecure,
-			smtpHost: this.smtpHost,
+			smtpHost: Math.floor(this.smtpHost),
 			smtpPort: this.smtpPort,
 			smtpUser: this.smtpAuth ? this.smtpUser : '',
 			smtpPass: this.smtpAuth ? this.smtpPass : '',
