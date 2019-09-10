@@ -72,7 +72,7 @@ class Script {
 		XBlock
 	},
 })
-export default class Vm extends Vue {
+export default class Page extends Vue {
 	@Prop() private page;
 	@Prop({	default: true }) private showTitle: boolean;
 	@Prop({	default: false }) private showFooter: boolean;

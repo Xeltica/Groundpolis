@@ -5,30 +5,19 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 
 @Component
 export default class XTextareaInput extends Vue {
-	props: {
-		value: {
-			required: true
-		},
-		script: {
-			required: true
-		}
-	},
+	@Prop() private readonly value;
+	@Prop() private readonly script;
 
-	data() {
-		return {
-			v: this.value.default,
-		};
-	},
+	private v = this.value.default;
 
-	watch: {
-		v() {
-			this.script.aiScript.updatePageVar(this.value.name, this.v);
-			this.script.eval();
-		}
+	@Watch('v')
+	public watchV() {
+		this.script.aiScript.updatePageVar(this.value.name, this.v);
+		this.script.eval();
 	}
 }
 </script>
