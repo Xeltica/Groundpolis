@@ -26,38 +26,37 @@ import i18n from '../../../../i18n';
 import * as tinycolor from 'tinycolor2';
 import ApexCharts from 'apexcharts';
 
-export default Vue.extend({
-	i18n: i18n('common/views/components/drive-settings.vue'),
-	data() {
+@Component({
+	i18n: i18n('common/views/components/drive-settings.vue')
+})
+export default class Drive extends Vue {
+	private fetching = true;
+	private usage: number;
+	private capacity: number;
+	private uploadFolderName: string;
+
+	public get meterStyle() {
 		return {
-			fetching: true,
-			usage: null,
-			capacity: null,
-			uploadFolderName: null
+			width: `${this.usage / this.capacity * 100}%`,
+			background: tinycolor({
+				h: 180 - (this.usage / this.capacity * 180),
+				s: 0.7,
+				l: 0.5
+			})
 		};
-	},
+	}
 
-	computed: {
-		meterStyle(): any {
-			return {
-				width: `${this.usage / this.capacity * 100}%`,
-				background: tinycolor({
-					h: 180 - (this.usage / this.capacity * 180),
-					s: 0.7,
-					l: 0.5
-				})
-			};
-		},
+	public get uploadFolder() {
+		return this.$store.state.settings.uploadFolder;
+	}
 
-		uploadFolder: {
-			get() { return this.$store.state.settings.uploadFolder; },
-			set(value) { this.$store.dispatch('settings/set', { key: 'uploadFolder', value }); }
-		},
-	},
+	public set uploadFolder(value) {
+		this.$store.dispatch('settings/set', { key: 'uploadFolder', value });
+	}
 
-	mounted() {
+	public mounted() {
 		if (this.uploadFolder == null) {
-			this.uploadFolderName = this.$t('@._settings.root');
+			this.uploadFolderName = this.$t('@._settings.root') as string;
 		} else {
 			this.$root.api('drive/folders/show', {
 				folderId: this.uploadFolder
@@ -65,7 +64,7 @@ export default Vue.extend({
 				this.uploadFolderName = folder.name;
 			});
 		}
-	
+
 		this.$root.api('drive').then(info => {
 			this.capacity = info.capacity;
 			this.usage = info.usage;
@@ -75,118 +74,116 @@ export default Vue.extend({
 				this.renderChart();
 			});
 		});
-	},
+	}
 
-	methods: {
-		renderChart() {
-			this.$root.api('charts/user/drive', {
-				userId: this.$store.state.i.id,
-				span: 'day',
-				limit: 21
-			}).then(stats => {
-				const addition = [];
-				const deletion = [];
+	public renderChart() {
+		this.$root.api('charts/user/drive', {
+			userId: this.$store.state.i.id,
+			span: 'day',
+			limit: 21
+		}).then(stats => {
+			const addition = [] as any[];
+			const deletion = [] as any[];
 
-				const now = new Date();
-				const y = now.getFullYear();
-				const m = now.getMonth();
-				const d = now.getDate();
+			const now = new Date();
+			const y = now.getFullYear();
+			const m = now.getMonth();
+			const d = now.getDate();
 
-				for (let i = 0; i < 21; i++) {
-					const x = new Date(y, m, d - i);
-					addition.push([
-						x,
-						stats.incSize[i]
-					]);
-					deletion.push([
-						x,
-						-stats.decSize[i]
-					]);
-				}
+			for (let i = 0; i < 21; i++) {
+				const x = new Date(y, m, d - i);
+				addition.push([
+					x,
+					stats.incSize[i]
+				]);
+				deletion.push([
+					x,
+					-stats.decSize[i]
+				]);
+			}
 
-				const chart = new ApexCharts(this.$refs.chart, {
-					chart: {
-						type: 'bar',
-						stacked: true,
-						height: 150,
-						zoom: {
-							enabled: false
-						},
-						toolbar: {
-							show: false
-						}
-					},
-					plotOptions: {
-						bar: {
-							columnWidth: '80%'
-						}
-					},
-					grid: {
-						clipMarkers: false,
-						borderColor: 'rgba(0, 0, 0, 0.1)',
-						xaxis: {
-							lines: {
-								show: true,
-							}
-						},
-					},
-					tooltip: {
-						shared: true,
-						intersect: false
-					},
-					dataLabels: {
+			const chart = new ApexCharts(this.$refs.chart, {
+				chart: {
+					type: 'bar',
+					stacked: true,
+					height: 150,
+					zoom: {
 						enabled: false
 					},
-					legend: {
+					toolbar: {
 						show: false
-					},
-					series: [{
-						name: 'Additions',
-						data: addition
-					}, {
-						name: 'Deletions',
-						data: deletion
-					}],
+					}
+				},
+				plotOptions: {
+					bar: {
+						columnWidth: '80%'
+					}
+				},
+				grid: {
+					clipMarkers: false,
+					borderColor: 'rgba(0, 0, 0, 0.1)',
 					xaxis: {
-						type: 'datetime',
-						labels: {
-							style: {
-								colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-							}
-						},
-						axisBorder: {
-							color: 'rgba(0, 0, 0, 0.1)'
-						},
-						axisTicks: {
-							color: 'rgba(0, 0, 0, 0.1)'
-						},
-						crosshairs: {
-							width: 1,
-							opacity: 1
+						lines: {
+							show: true,
 						}
 					},
-					yaxis: {
-						labels: {
-							formatter: v => Vue.filter('bytes')(v, 0),
-							style: {
-								color: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
-							}
+				},
+				tooltip: {
+					shared: true,
+					intersect: false
+				},
+				dataLabels: {
+					enabled: false
+				},
+				legend: {
+					show: false
+				},
+				series: [{
+					name: 'Additions',
+					data: addition
+				}, {
+					name: 'Deletions',
+					data: deletion
+				}],
+				xaxis: {
+					type: 'datetime',
+					labels: {
+						style: {
+							colors: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
+						}
+					},
+					axisBorder: {
+						color: 'rgba(0, 0, 0, 0.1)'
+					},
+					axisTicks: {
+						color: 'rgba(0, 0, 0, 0.1)'
+					},
+					crosshairs: {
+						width: 1,
+						opacity: 1
+					}
+				},
+				yaxis: {
+					labels: {
+						formatter: v => Vue.filter('bytes')(v, 0),
+						style: {
+							color: tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--text')).toRgbString()
 						}
 					}
-				});
-
-				chart.render();
+				}
 			});
-		},
 
-		chooseUploadFolder() {
-			this.$chooseDriveFolder().then(folder => {
-				this.uploadFolder = folder ? folder.id : null;
-				this.uploadFolderName = folder ? folder.name : this.$t('@._settings.root');
-			})
-		}
+			chart.render();
+		});
 	}
-});
+
+	public chooseUploadFolder() {
+		this.$chooseDriveFolder().then(folder => {
+			this.uploadFolder = folder ? folder.id : null;
+			this.uploadFolderName = folder ? folder.name : this.$t('@._settings.root');
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

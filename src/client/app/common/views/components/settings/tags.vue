@@ -18,41 +18,37 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import { v4 as uuid } from 'uuid';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('desktop/views/components/settings.tags.vue'),
-	data() {
-		return {
-			timelines: this.$store.state.settings.tagTimelines
-		};
-	},
+})
+export default class Vm extends Vue {
+	private timelines = this.$store.state.settings.tagTimelines;
 
-	methods: {
-		add() {
-			this.timelines.push({
-				id: uuid(),
-				title: '',
-				query: ''
-			});
-		},
-
-		save() {
-			const timelines = this.timelines
-				.filter(timeline => timeline.title)
-				.map(timeline => {
-					if (!(timeline.query && timeline.query[0] && timeline.query[0][0])) {
-						timeline.query = timeline.title.split('\n').map(tags => tags.split(' '));
-					}
-					return timeline;
-				});
-
-			this.$store.dispatch('settings/set', { key: 'tagTimelines', value: timelines });
-		},
-
-		onQueryChange(timeline, value) {
-			timeline.query = value.split('\n').map(tags => tags.split(' '));
-		}
+	public add() {
+		this.timelines.push({
+			id: uuid(),
+			title: '',
+			query: ''
+		});
 	}
-});
+
+	public save() {
+		const timelines = this.timelines
+			.filter(timeline => timeline.title)
+			.map(timeline => {
+				if (!(timeline.query && timeline.query[0] && timeline.query[0][0])) {
+					timeline.query = timeline.title.split('\n').map(tags => tags.split(' '));
+				}
+				return timeline;
+			});
+
+		this.$store.dispatch('settings/set', { key: 'tagTimelines', value: timelines });
+	}
+
+	public onQueryChange(timeline, value) {
+		timeline.query = value.split('\n').map(tags => tags.split(' '));
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

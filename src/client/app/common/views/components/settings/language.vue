@@ -23,32 +23,23 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import { langs } from '../../../../config';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/language-settings.vue'),
+})
+export default class Language extends Vue {
 
-	data() {
-		return {
-			langs,
-			currentLanguage: 'Unknown',
-		};
-	},
+	private langs = langs;
+	private currentLanguage = 'Unknown';
 
-	computed: {
-		lang: {
-			get() { return this.$store.state.device.lang; },
-			set(value) { this.$store.commit('device/set', { key: 'lang', value }); }
-		},
-	},
+	public get lang() { return this.$store.state.device.lang; }
+	public set lang(value) { this.$store.commit('device/set', { key: 'lang', value }); }
 
-	created() {
+	public created() {
 		try {
 			const locale = JSON.parse(localStorage.getItem('locale') || "{}");
 			const localeKey = localStorage.getItem('localeKey');
 			this.currentLanguage = `${locale.meta.lang} (${localeKey})`;
 		} catch { }
-	},
-
-	methods: {
 	}
-});
+}
 </script>

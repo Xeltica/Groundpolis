@@ -30,30 +30,26 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import { apiUrl } from '../../../../config';
 
-export default Vue.extend({
-	i18n: i18n('common/views/components/integration-settings.vue'),
+@Component
+export default class Integration extends Vue {
 
-	data() {
-		return {
-			apiUrl,
-			twitterForm: null,
-			discordForm: null,
-			githubForm: null,
-			enableTwitterIntegration: false,
-			enableDiscordIntegration: false,
-			enableGithubIntegration: false,
-		};
-	},
+	private apiUrl = apiUrl;
+	private twitterForm: Window | null;
+	private discordForm: Window | null;
+	private githubForm: Window | null;
+	private enableTwitterIntegration = false;
+	private enableDiscordIntegration = false;
+	private enableGithubIntegration = false;
 
-	created() {
+	public created() {
 		this.$root.getMeta().then(meta => {
 			this.enableTwitterIntegration = meta.enableTwitterIntegration;
 			this.enableDiscordIntegration = meta.enableDiscordIntegration;
 			this.enableGithubIntegration = meta.enableGithubIntegration;
 		});
-	},
+	}
 
-	mounted() {
+	public mounted() {
 		if (!document.cookie.match(/i=(\w+)/)) {
 			document.cookie = `i=${this.$store.state.i.token}; path=/;` +
 			` domain=${document.location.hostname}; max-age=31536000;` +
@@ -72,46 +68,44 @@ export default Vue.extend({
 		}, {
 			deep: true
 		});
-	},
-
-	methods: {
-		connectTwitter() {
-			this.twitterForm = window.open(apiUrl + '/connect/twitter',
-				'twitter_connect_window',
-				'height=570, width=520');
-		},
-
-		disconnectTwitter() {
-			window.open(apiUrl + '/disconnect/twitter',
-				'twitter_disconnect_window',
-				'height=570, width=520');
-		},
-
-		connectDiscord() {
-			this.discordForm = window.open(apiUrl + '/connect/discord',
-				'discord_connect_window',
-				'height=570, width=520');
-		},
-
-		disconnectDiscord() {
-			window.open(apiUrl + '/disconnect/discord',
-				'discord_disconnect_window',
-				'height=570, width=520');
-		},
-
-		connectGithub() {
-			this.githubForm = window.open(apiUrl + '/connect/github',
-				'github_connect_window',
-				'height=570, width=520');
-		},
-
-		disconnectGithub() {
-			window.open(apiUrl + '/disconnect/github',
-				'github_disconnect_window',
-				'height=570, width=520');
-		},
 	}
-});
+
+	public connectTwitter() {
+		this.twitterForm = window.open(apiUrl + '/connect/twitter',
+			'twitter_connect_window',
+			'height=570, width=520');
+	}
+
+	public disconnectTwitter() {
+		window.open(apiUrl + '/disconnect/twitter',
+			'twitter_disconnect_window',
+			'height=570, width=520');
+	}
+
+	public connectDiscord() {
+		this.discordForm = window.open(apiUrl + '/connect/discord',
+			'discord_connect_window',
+			'height=570, width=520');
+	}
+
+	public disconnectDiscord() {
+		window.open(apiUrl + '/disconnect/discord',
+			'discord_disconnect_window',
+			'height=570, width=520');
+	}
+
+	public connectGithub() {
+		this.githubForm = window.open(apiUrl + '/connect/github',
+			'github_connect_window',
+			'height=570, width=520');
+	}
+
+	public disconnectGithub() {
+		window.open(apiUrl + '/disconnect/github',
+			'github_disconnect_window',
+			'height=570, width=520');
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

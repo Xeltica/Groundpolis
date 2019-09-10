@@ -1,7 +1,7 @@
 <template>
 <div class="root">
 <div class="signins" v-if="signins.length != 0">
-	<div v-for="signin in signins">
+	<div v-for="signin in signins" :key="signin.id">
 		<header @click="signin._show = !signin._show">
 			<template v-if="signin.success"><fa icon="check"/></template>
 			<template v-else><fa icon="times"/></template>
@@ -18,16 +18,15 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	data() {
-		return {
-			fetching: true,
-			signins: [],
-			connection: null
-		};
-	},
+import { Signin } from '../../../../../../models/entities/signin';
+import { Connection } from '../../../scripts/Connection';
+@Component
+export default class Signins extends Vue {
+	private fetching = true;
+	private signins: Signin[];
+	private connection: Connection;
 
-	mounted() {
+	public mounted() {
 		this.$root.api('i/signin_history').then(signins => {
 			this.signins = signins;
 			this.fetching = false;
@@ -36,18 +35,16 @@ export default Vue.extend({
 		this.connection = this.$root.stream.useSharedConnection('main');
 
 		this.connection.on('signin', this.onSignin);
-	},
-
-	beforeDestroy() {
-		this.connection.dispose();
-	},
-
-	methods: {
-		onSignin(signin) {
-			this.signins.unshift(signin);
-		}
 	}
-});
+
+	public beforeDestroy() {
+		this.connection.dispose();
+	}
+
+	public onSignin(signin) {
+		this.signins.unshift(signin);
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

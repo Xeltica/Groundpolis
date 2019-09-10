@@ -37,73 +37,69 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import * as JSON5 from 'json5';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/api-settings.vue'),
+})
+export default class Api extends Vue {
 
-	data() {
-		return {
-			endpoint: '',
-			body: '{}',
-			res: null,
-			sending: false,
-			endpoints: [],
-			timeout: null,
-		};
-	},
+	private endpoint = '';
+	private body = '{}';
+	private res: string;
+	private sending = false;
+	private endpoints: string[];
+	private timeout: number;
 
-	created() {
+	public created() {
 		this.$root.api('endpoints').then(endpoints => {
 			this.endpoints = endpoints;
 		});
-	},
-
-	methods: {
-		regenerateToken() {
-			this.$root.dialog({
-				title: this.$t('enter-password'),
-				input: {
-					type: 'password'
-				}
-			}).then(({ canceled, result: password }) => {
-				if (canceled) return;
-				this.$root.api('i/regenerate_token', {
-					password: password
-				});
-			});
-		},
-
-		send() {
-			this.sending = true;
-			this.$root.api(this.endpoint, JSON5.parse(this.body)).then(res => {
-				this.sending = false;
-				this.res = JSON5.stringify(res, null, 2);
-			}, err => {
-				this.sending = false;
-				this.res = JSON5.stringify(err, null, 2);
-			});
-		},
-
-		onEndpointChange() {
-			if (this.timeout !== null) {
-				clearTimeout(this.timeout);
-			}
-
-			this.timeout = setTimeout(() => {
-				this.$root.api('endpoint', { endpoint: this.endpoint }).then(endpoint => {
-					const body = {};
-					for (const p of endpoint.params) {
-						body[p.name] =
-							p.type === 'String' ? '' :
-							p.type === 'Number' ? 0 :
-							p.type === 'Boolean' ? false :
-							p.type === 'Array' ? [] :
-							p.type === 'Object' ? {} :
-							null;
-					}
-					this.body = JSON5.stringify(body, null, 2);
-				});
-			}, 1000);
-		},
 	}
-});
+
+	public regenerateToken() {
+		this.$root.dialog({
+			title: this.$t('enter-password'),
+			input: {
+				type: 'password'
+			}
+		}).then(({ canceled, result: password }) => {
+			if (canceled) return;
+			this.$root.api('i/regenerate_token', {
+				password: password
+			});
+		});
+	}
+
+	public send() {
+		this.sending = true;
+		this.$root.api(this.endpoint, JSON5.parse(this.body)).then(res => {
+			this.sending = false;
+			this.res = JSON5.stringify(res, null, 2);
+		}, err => {
+			this.sending = false;
+			this.res = JSON5.stringify(err, null, 2);
+		});
+	}
+
+	public onEndpointChange() {
+		if (this.timeout !== null) {
+			clearTimeout(this.timeout);
+		}
+
+		this.timeout = window.setTimeout(() => {
+			this.$root.api('endpoint', { endpoint: this.endpoint }).then(endpoint => {
+				const body = {};
+				for (const p of endpoint.params) {
+					body[p.name] =
+						p.type === 'String' ? '' :
+						p.type === 'Number' ? 0 :
+						p.type === 'Boolean' ? false :
+						p.type === 'Array' ? [] :
+						p.type === 'Object' ? {} :
+						null;
+				}
+				this.body = JSON5.stringify(body, null, 2);
+			});
+		}, 1000);
+	}
+}
 </script>

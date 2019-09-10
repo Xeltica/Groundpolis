@@ -17,37 +17,32 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import { faMobileAlt } from '@fortawesome/free-solid-svg-icons'
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/settings/app-type.vue'),
+})
+export default class AppType extends Vue {
 
-	data() {
-		return {
-			faMobileAlt
-		};
-	},
+	private faMobileAlt = faMobileAlt;
 
-	computed: {
-		appTypeForce: {
-			get() { return this.$store.state.device.appTypeForce; },
-			set(value) {
-				this.$store.commit('device/set', { key: 'appTypeForce', value });
-				this.reload();
-			}
-		},
-	},
-
-	methods: {
-		reload() {
-			this.$root.dialog({
-				type: 'warning',
-				text: this.$t('@.reload-to-apply-the-setting'),
-				showCancelButton: true
-			}).then(({ canceled }) => {
-				if (!canceled) {
-					location.reload();
-				}
-			});
-		},
+	public get appTypeForce() {
+		return this.$store.state.device.appTypeForce;
 	}
-});
+
+	public set appTypeForce(value) {
+		this.$store.commit('device/set', { key: 'appTypeForce', value });
+		this.reload();
+	}
+
+	public reload() {
+		this.$root.dialog({
+			type: 'warning',
+			text: this.$t('@.reload-to-apply-the-setting'),
+			showCancelButton: true
+		}).then(({ canceled }) => {
+			if (!canceled) {
+				location.reload();
+			}
+		});
+	}
+}
 </script>

@@ -18,27 +18,26 @@
 import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/notification-settings.vue'),
-
-	methods: {
-		onChangeAutoWatch(v) {
-			this.$root.api('i/update', {
-				autoWatch: v
-			});
-		},
-
-		readAllUnreadNotes() {
-			this.$root.api('i/read_all_unread_notes');
-		},
-
-		readAllMessagingMessages() {
-			this.$root.api('i/read_all_messaging_messages');
-		},
-
-		readAllNotifications() {
-			this.$root.api('notifications/mark_all_as_read');
-		}
+})
+export default class Notification extends Vue {
+	public onChangeAutoWatch(v) {
+		this.$root.api('i/update', {
+			autoWatch: v
+		});
 	}
-});
+
+	public readAllUnreadNotes() {
+		this.$root.api('i/read_all_unread_notes');
+	}
+
+	public readAllMessagingMessages() {
+		this.$root.api('i/read_all_messaging_messages');
+	}
+
+	public readAllNotifications() {
+		this.$root.api('notifications/mark_all_as_read');
+	}
+}
 </script>

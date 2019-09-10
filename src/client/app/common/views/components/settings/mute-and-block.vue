@@ -45,82 +45,79 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
+import { Muting } from '../../../../../../models/entities/muting';
+import { Blocking } from '../../../../../../models/entities/blocking';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/mute-and-block.vue'),
+})
+export default class MuteAndBlock extends Vue {
+	private muteFetching = true;
+	private blockFetching = true;
+	private mute: Muting[];
+	private block: Blocking[];
+	private mutedWords = '';
 
-	data() {
-		return {
-			muteFetching: true,
-			blockFetching: true,
-			mute: [],
-			block: [],
-			mutedWords: ''
-		};
-	},
+	public get _mutedWords() { return this.$store.state.settings.mutedWords; }
+	public set _mutedWords(value) { this.$store.dispatch('settings/set', { key: 'mutedWords', value }); }
 
-	computed: {
-		_mutedWords: {
-			get() { return this.$store.state.settings.mutedWords; },
-			set(value) { this.$store.dispatch('settings/set', { key: 'mutedWords', value }); }
-		},
-	},
-
-	mounted() {
+	public mounted() {
 		this.mutedWords = this._mutedWords.map(words => words.join(' ')).join('\n');
 
 		this.updateMute();
 		this.updateBlock();
-	},
-
-	methods: {
-		save() {
-			this._mutedWords = this.mutedWords.split('\n').map(line => line.split(' ').filter(x => x != ''));
-		},
-		unmute(user) {
-			this.$root.dialog({
-				type: 'warning',
-				text: this.$t('unmute-confirm'),
-				showCancelButton: true
-			}).then(({ canceled }) => {
-				if (canceled) return;
-				this.$root.api('mute/delete', {
-					userId: user.id
-				}).then(() => {
-					this.updateMute();
-				});
-			});
-		},
-		unblock(user) {
-			this.$root.dialog({
-				type: 'warning',
-				text: this.$t('unblock-confirm'),
-				showCancelButton: true
-			}).then(({ canceled }) => {
-				if (canceled) return;
-				this.$root.api('blocking/delete', {
-					userId: user.id
-				}).then(() => {
-					this.updateBlock();
-				});
-			});
-		},
-		updateMute() {
-			this.muteFetching = true;
-			this.$root.api('mute/list').then(mute => {
-				this.mute = mute.map(x => x.mutee);
-				this.muteFetching = false;
-			});
-		},
-		updateBlock() {
-			this.blockFetching = true;
-			this.$root.api('blocking/list').then(blocking => {
-				this.block = blocking.map(x => x.blockee);
-				this.blockFetching = false;
-			});
-		}
 	}
-});
+
+	public save() {
+		this._mutedWords = this.mutedWords.split('\n').map(line => line.split(' ').filter(x => x != ''));
+	}
+
+	public unmute(user) {
+		this.$root.dialog({
+			type: 'warning',
+			text: this.$t('unmute-confirm'),
+			showCancelButton: true
+		}).then(({ canceled }) => {
+			if (canceled) return;
+			this.$root.api('mute/delete', {
+				userId: user.id
+			}).then(() => {
+				this.updateMute();
+			});
+		});
+	}
+
+	public unblock(user) {
+		this.$root.dialog({
+			type: 'warning',
+			text: this.$t('unblock-confirm'),
+			showCancelButton: true
+		}).then(({ canceled }) => {
+			if (canceled) return;
+			this.$root.api('blocking/delete', {
+				userId: user.id
+			}).then(() => {
+				this.updateBlock();
+			});
+		});
+	}
+
+	public updateMute() {
+		this.muteFetching = true;
+		this.$root.api('mute/list').then(mute => {
+			this.mute = mute.map(x => x.mutee);
+			this.muteFetching = false;
+		});
+	}
+
+	public updateBlock() {
+		this.blockFetching = true;
+		this.$root.api('blocking/list').then(blocking => {
+			this.block = blocking.map(x => x.blockee);
+			this.blockFetching = false;
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

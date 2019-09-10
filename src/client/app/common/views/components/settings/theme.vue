@@ -121,7 +121,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import i18n from '../../../../i18n';
 import { lightTheme, darkTheme, builtinThemes, applyTheme, Theme } from '../../../../theme';
 import { Chrome } from 'vue-color';
@@ -130,199 +130,186 @@ import * as tinycolor from 'tinycolor2';
 import * as JSON5 from 'json5';
 import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/theme.vue'),
 	components: {
 		ColorPicker: Chrome
 	},
+})
+export default class Theme extends Vue {
+	private builtinThemes = builtinThemes;
+	private installThemeCode: string;
+	private selectedThemeId: string;
+	private myThemeBase = 'light';
+	private myThemeName = '';
+	private myThemeDesc = '';
+	private myThemePrimary = lightTheme.vars.primary;
+	private myThemeSecondary = lightTheme.vars.secondary;
+	private myThemeText = lightTheme.vars.text;
+	private faMoon = faMoon;
+	private faSun = faSun;
 
-	data() {
+	public get themes(): Theme[] {
+		return builtinThemes.concat(this.$store.state.device.themes);
+	}
+
+	public get darkThemes(): Theme[] {
+		return this.themes.filter(t => t.base == 'dark' || t.kind == 'dark');
+	}
+
+	public get lightThemes(): Theme[] {
+		return this.themes.filter(t => t.base == 'light' || t.kind == 'light');
+	}
+
+	public get installedThemes(): Theme[] {
+		return this.$store.state.device.themes;
+	}
+
+	public get light() { return this.$store.state.device.lightTheme; }
+	public set light(value) { this.$store.commit('device/set', { key: 'lightTheme', value }); }
+
+	public get dark() { return this.$store.state.device.darkTheme; }
+	public set dark(value) { this.$store.commit('device/set', { key: 'darkTheme', value }); }
+
+	public get selectedTheme() {
+		if (this.selectedThemeId == null) return null;
+		return this.themes.find(x => x.id == this.selectedThemeId);
+	}
+
+	public get selectedThemeCode() {
+		if (this.selectedTheme == null) return null;
+		return JSON5.stringify(this.selectedTheme, null, '\t');
+	}
+
+	public get myTheme(): any {
 		return {
-			builtinThemes: builtinThemes,
-			installThemeCode: null,
-			selectedThemeId: null,
-			myThemeBase: 'light',
-			myThemeName: '',
-			myThemeDesc: '',
-			myThemePrimary: lightTheme.vars.primary,
-			myThemeSecondary: lightTheme.vars.secondary,
-			myThemeText: lightTheme.vars.text,
-			faMoon, faSun
+			name: this.myThemeName,
+			author: this.$store.state.i.username,
+			desc: this.myThemeDesc,
+			base: this.myThemeBase,
+			vars: {
+				primary: tinycolor(typeof this.myThemePrimary == 'string' ? this.myThemePrimary : this.myThemePrimary.rgba).toRgbString(),
+				secondary: tinycolor(typeof this.myThemeSecondary == 'string' ? this.myThemeSecondary : this.myThemeSecondary.rgba).toRgbString(),
+				text: tinycolor(typeof this.myThemeText == 'string' ? this.myThemeText : this.myThemeText.rgba).toRgbString()
+			}
 		};
-	},
+	}
 
-	computed: {
-		themes(): Theme[] {
-			return builtinThemes.concat(this.$store.state.device.themes);
-		},
+	public get darkmode() { return this.$store.state.device.darkmode; }
+	public set darkmode(value) { this.$store.commit('device/set', { key: 'darkmode', value }); }
 
-		darkThemes(): Theme[] {
-			return this.themes.filter(t => t.base == 'dark' || t.kind == 'dark');
-		},
+	@Watch('myThemeBase')
+	public watchMyThemeBase(v) {
+		const theme = v == 'light' ? lightTheme : darkTheme;
+		this.myThemePrimary = theme.vars.primary;
+		this.myThemeSecondary = theme.vars.secondary;
+		this.myThemeText = theme.vars.text;
+	}
 
-		lightThemes(): Theme[] {
-			return this.themes.filter(t => t.base == 'light' || t.kind == 'light');
-		},
+	public install(code) {
+		let theme;
 
-		installedThemes(): Theme[] {
-			return this.$store.state.device.themes;
-		},
-
-		light: {
-			get() { return this.$store.state.device.lightTheme; },
-			set(value) { this.$store.commit('device/set', { key: 'lightTheme', value }); }
-		},
-
-		dark: {
-			get() { return this.$store.state.device.darkTheme; },
-			set(value) { this.$store.commit('device/set', { key: 'darkTheme', value }); }
-		},
-
-		selectedTheme() {
-			if (this.selectedThemeId == null) return null;
-			return this.themes.find(x => x.id == this.selectedThemeId);
-		},
-
-		selectedThemeCode() {
-			if (this.selectedTheme == null) return null;
-			return JSON5.stringify(this.selectedTheme, null, '\t');
-		},
-
-		myTheme(): any {
-			return {
-				name: this.myThemeName,
-				author: this.$store.state.i.username,
-				desc: this.myThemeDesc,
-				base: this.myThemeBase,
-				vars: {
-					primary: tinycolor(typeof this.myThemePrimary == 'string' ? this.myThemePrimary : this.myThemePrimary.rgba).toRgbString(),
-					secondary: tinycolor(typeof this.myThemeSecondary == 'string' ? this.myThemeSecondary : this.myThemeSecondary.rgba).toRgbString(),
-					text: tinycolor(typeof this.myThemeText == 'string' ? this.myThemeText : this.myThemeText.rgba).toRgbString()
-				}
-			};
-		},
-
-		darkmode: {
-			get() { return this.$store.state.device.darkmode; },
-			set(value) { this.$store.commit('device/set', { key: 'darkmode', value }); }
-		},
-	},
-
-	watch: {
-		myThemeBase(v) {
-			const theme = v == 'light' ? lightTheme : darkTheme;
-			this.myThemePrimary = theme.vars.primary;
-			this.myThemeSecondary = theme.vars.secondary;
-			this.myThemeText = theme.vars.text;
-		}
-	},
-
-	methods: {
-		install(code) {
-			let theme;
-
-			try {
-				theme = JSON5.parse(code);
-			} catch (e) {
-				this.$root.dialog({
-					type: 'error',
-					text: this.$t('invalid-theme')
-				});
-				return;
-			}
-
-			if (theme.id == null) {
-				this.$root.dialog({
-					type: 'error',
-					text: this.$t('invalid-theme')
-				});
-				return;
-			}
-
-			if (this.$store.state.device.themes.some(t => t.id == theme.id)) {
-				this.$root.dialog({
-					type: 'info',
-					text: this.$t('already-installed')
-				});
-				return;
-			}
-
-			const themes = this.$store.state.device.themes.concat(theme);
-			this.$store.commit('device/set', {
-				key: 'themes', value: themes
-			});
-
+		try {
+			theme = JSON5.parse(code);
+		} catch (e) {
 			this.$root.dialog({
-				type: 'success',
-				text: this.$t('installed').replace('{}', theme.name)
+				type: 'error',
+				text: this.$t('invalid-theme')
 			});
-		},
+			return;
+		}
 
-		uninstall() {
-			const theme = this.selectedTheme;
-			const themes = this.$store.state.device.themes.filter(t => t.id != theme.id);
-			this.$store.commit('device/set', {
-				key: 'themes', value: themes
+		if (theme.id == null) {
+			this.$root.dialog({
+				type: 'error',
+				text: this.$t('invalid-theme')
 			});
+			return;
+		}
 
+		if (this.$store.state.device.themes.some(t => t.id == theme.id)) {
 			this.$root.dialog({
 				type: 'info',
-				text: this.$t('uninstalled').replace('{}', theme.name)
+				text: this.$t('already-installed')
 			});
-		},
-
-		import_() {
-			(this.$refs.file as any).click();
-		},
-
-		export_() {
-			const blob = new Blob([this.selectedThemeCode], {
-				type: 'application/json5'
-			});
-			this.$refs.export.$el.href = window.URL.createObjectURL(blob);
-		},
-
-		onUpdateImportFile() {
-			const f = (this.$refs.file as any).files[0];
-
-			const reader = new FileReader();
-
-			reader.onload = e => {
-				this.install(e.target.result);
-			};
-
-			reader.readAsText(f);
-		},
-
-		preview() {
-			applyTheme(this.myTheme, false);
-		},
-
-		gen() {
-			const theme = this.myTheme;
-
-			if (theme.name == null || theme.name.trim() == '') {
-				this.$root.dialog({
-					type: 'warning',
-					text: this.$t('theme-name-required')
-				});
-				return;
-			}
-
-			theme.id = uuid();
-
-			const themes = this.$store.state.device.themes.concat(theme);
-			this.$store.commit('device/set', {
-				key: 'themes', value: themes
-			});
-
-			this.$root.dialog({
-				type: 'success',
-				text: this.$t('saved')
-			});
+			return;
 		}
+
+		const themes = this.$store.state.device.themes.concat(theme);
+		this.$store.commit('device/set', {
+			key: 'themes', value: themes
+		});
+
+		this.$root.dialog({
+			type: 'success',
+			text: this.$t('installed').replace('{}', theme.name)
+		});
 	}
-});
+
+	public uninstall() {
+		const theme = this.selectedTheme;
+		const themes = this.$store.state.device.themes.filter(t => t.id != theme.id);
+		this.$store.commit('device/set', {
+			key: 'themes', value: themes
+		});
+
+		this.$root.dialog({
+			type: 'info',
+			text: this.$t('uninstalled').replace('{}', theme.name)
+		});
+	}
+
+	public import_() {
+		(this.$refs.file as any).click();
+	}
+
+	public export_() {
+		const blob = new Blob([this.selectedThemeCode], {
+			type: 'application/json5'
+		});
+		this.$refs.export.$el.href = window.URL.createObjectURL(blob);
+	}
+
+	public onUpdateImportFile() {
+		const f = (this.$refs.file as any).files[0];
+
+		const reader = new FileReader();
+
+		reader.onload = e => {
+			this.install(e.target.result);
+		};
+
+		reader.readAsText(f);
+	}
+
+	public preview() {
+		applyTheme(this.myTheme, false);
+	}
+
+	public gen() {
+		const theme = this.myTheme;
+
+		if (theme.name == null || theme.name.trim() == '') {
+			this.$root.dialog({
+				type: 'warning',
+				text: this.$t('theme-name-required')
+			});
+			return;
+		}
+
+		theme.id = uuid();
+
+		const themes = this.$store.state.device.themes.concat(theme);
+		this.$store.commit('device/set', {
+			key: 'themes', value: themes
+		});
+
+		this.$root.dialog({
+			type: 'success',
+			text: this.$t('saved')
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

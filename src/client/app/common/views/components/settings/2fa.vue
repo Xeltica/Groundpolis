@@ -14,7 +14,7 @@
 			<h2 class="heading">{{ $t('security-key-header') }}</h2>
 			<p>{{ $t('security-key') }}</p>
 			<div class="key-list">
-				<div class="key" v-for="key in $store.state.i.securityKeysList">
+				<div class="key" v-for="key in $store.state.i.securityKeysList" :key="key.id">
 					<h3>
 						{{ key.name }}
 					</h3>
@@ -75,163 +75,161 @@ import { hostname } from '../../../../config';
 import { hexifyAB } from '../../../scripts/2fa';
 
 function stringifyAB(buffer) {
-	return String.fromCharCode.apply(null, new Uint8Array(buffer));
+	return String.fromCharCode.apply(null, Array.from(new Uint8Array(buffer)));
 }
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('desktop/views/components/settings.2fa.vue'),
-	data() {
-		return {
-			data: null,
-			supportsCredentials: !!navigator.credentials,
-			usePasswordLessLogin: this.$store.state.i.usePasswordLessLogin,
-			registration: null,
-			keyName: '',
-			token: null
-		};
-	},
-	methods: {
-		register() {
-			this.$root.dialog({
-				title: this.$t('enter-password'),
-				input: {
-					type: 'password'
-				}
-			}).then(({ canceled, result: password }) => {
-				if (canceled) return;
-				this.$root.api('i/2fa/register', {
-					password: password
-				}).then(data => {
-					this.data = data;
-				});
-			});
-		},
+})
+export default class TwoFactorAuthentication extends Vue {
+	private data: any;
+	private supportsCredentials = (navigator as any).credential;
+	private usePasswordLessLogin: boolean = this.$store.state.i.usePasswordLessLogin;
+	private registration: any;
+	private keyName = '';
+	private token: string;
 
-		unregister() {
-			this.$root.dialog({
-				title: this.$t('enter-password'),
-				input: {
-					type: 'password'
-				}
-			}).then(({ canceled, result: password }) => {
-				if (canceled) return;
-				this.$root.api('i/2fa/unregister', {
-					password: password
-				}).then(() => {
-					this.usePasswordLessLogin = false;
-					this.updatePasswordLessLogin();
-				}).then(() => {
-					this.$notify(this.$t('unregistered'));
-					this.$store.state.i.twoFactorEnabled = false;
-				});
+	public register() {
+		this.$root.dialog({
+			title: this.$t('enter-password'),
+			input: {
+				type: 'password'
+			}
+		}).then(({ canceled, result: password }) => {
+			if (canceled) return;
+			this.$root.api('i/2fa/register', {
+				password: password
+			}).then(data => {
+				this.data = data;
 			});
-		},
-
-		submit() {
-			this.$root.api('i/2fa/done', {
-				token: this.token
-			}).then(() => {
-				this.$notify(this.$t('success'));
-				this.$store.state.i.twoFactorEnabled = true;
-			}).catch(() => {
-				this.$notify(this.$t('failed'));
-			});
-		},
-
-		registerKey() {
-			this.registration.saving = true;
-			this.$root.api('i/2fa/key-done', {
-				password: this.registration.password,
-				name: this.keyName,
-				challengeId: this.registration.challengeId,
-				// we convert each 16 bits to a string to serialise
-				clientDataJSON: stringifyAB(this.registration.credential.response.clientDataJSON),
-				attestationObject: hexifyAB(this.registration.credential.response.attestationObject)
-			}).then(key => {
-				this.registration = null;
-				key.lastUsed = new Date();
-				this.$notify(this.$t('success'));
-			})
-		},
-
-		unregisterKey(key) {
-			this.$root.dialog({
-				title: this.$t('enter-password'),
-				input: {
-					type: 'password'
-				}
-			}).then(({ canceled, result: password }) => {
-				if (canceled) return;
-				return this.$root.api('i/2fa/remove-key', {
-					password,
-					credentialId: key.id
-				}).then(() => {
-					this.usePasswordLessLogin = false;
-					this.updatePasswordLessLogin();
-				}).then(() => {
-					this.$notify(this.$t('key-unregistered'));
-				});
-			});
-		},
-
-		addSecurityKey() {
-			this.$root.dialog({
-				title: this.$t('enter-password'),
-				input: {
-					type: 'password'
-				}
-			}).then(({ canceled, result: password }) => {
-				if (canceled) return;
-				this.$root.api('i/2fa/register-key', {
-					password
-				}).then(registration => {
-					this.registration = {
-						password,
-						challengeId: registration.challengeId,
-						stage: 0,
-						publicKeyOptions: {
-							challenge: Buffer.from(
-								registration.challenge
-									.replace(/\-/g, "+")
-									.replace(/_/g, "/"),
-								'base64'
-							),
-							rp: {
-								id: hostname,
-								name: 'Groundpolis'
-							},
-							user: {
-								id: Uint8Array.from(this.$store.state.i.id, c => c.charCodeAt(0)),
-								name: this.$store.state.i.username,
-								displayName: this.$store.state.i.name,
-							},
-							pubKeyCredParams: [{alg: -7, type: 'public-key'}],
-							timeout: 60000,
-							attestation: 'direct'
-						},
-						saving: true
-					};
-					return navigator.credentials.create({
-						publicKey: this.registration.publicKeyOptions
-					});
-				}).then(credential => {
-					this.registration.credential = credential;
-					this.registration.saving = false;
-					this.registration.stage = 1;
-				}).catch(err => {
-					console.warn('Error while registering?', err);
-					this.registration.error = err.message;
-					this.registration.stage = -1;
-				});
-			});
-		},
-		updatePasswordLessLogin() {
-			this.$root.api('i/2fa/password-less', {
-				value: !!this.usePasswordLessLogin
-			});
-		}
+		});
 	}
-});
+
+	public unregister() {
+		this.$root.dialog({
+			title: this.$t('enter-password'),
+			input: {
+				type: 'password'
+			}
+		}).then(({ canceled, result: password }) => {
+			if (canceled) return;
+			this.$root.api('i/2fa/unregister', {
+				password: password
+			}).then(() => {
+				this.usePasswordLessLogin = false;
+				this.updatePasswordLessLogin();
+			}).then(() => {
+				this.$notify(this.$t('unregistered'));
+				this.$store.state.i.twoFactorEnabled = false;
+			});
+		});
+	}
+
+	public submit() {
+		this.$root.api('i/2fa/done', {
+			token: this.token
+		}).then(() => {
+			this.$notify(this.$t('success'));
+			this.$store.state.i.twoFactorEnabled = true;
+		}).catch(() => {
+			this.$notify(this.$t('failed'));
+		});
+	}
+
+	public registerKey() {
+		this.registration.saving = true;
+		this.$root.api('i/2fa/key-done', {
+			password: this.registration.password,
+			name: this.keyName,
+			challengeId: this.registration.challengeId,
+			// we convert each 16 bits to a string to serialise
+			clientDataJSON: stringifyAB(this.registration.credential.response.clientDataJSON),
+			attestationObject: hexifyAB(this.registration.credential.response.attestationObject)
+		}).then(key => {
+			this.registration = null;
+			key.lastUsed = new Date();
+			this.$notify(this.$t('success'));
+		});
+	}
+
+	public unregisterKey(key) {
+		this.$root.dialog({
+			title: this.$t('enter-password'),
+			input: {
+				type: 'password'
+			}
+		}).then(({ canceled, result: password }) => {
+			if (canceled) return;
+			return this.$root.api('i/2fa/remove-key', {
+				password,
+				credentialId: key.id
+			}).then(() => {
+				this.usePasswordLessLogin = false;
+				this.updatePasswordLessLogin();
+			}).then(() => {
+				this.$notify(this.$t('key-unregistered'));
+			});
+		});
+	}
+
+	public addSecurityKey() {
+		this.$root.dialog({
+			title: this.$t('enter-password'),
+			input: {
+				type: 'password'
+			}
+		}).then(({ canceled, result: password }) => {
+			if (canceled) return;
+			this.$root.api('i/2fa/register-key', {
+				password
+			}).then(registration => {
+				this.registration = {
+					password,
+					challengeId: registration.challengeId,
+					stage: 0,
+					publicKeyOptions: {
+						challenge: Buffer.from(
+							registration.challenge
+								.replace(/\-/g, '+')
+								.replace(/_/g, '/'),
+							'base64'
+						),
+						rp: {
+							id: hostname,
+							name: 'Groundpolis'
+						},
+						user: {
+							id: Uint8Array.from(this.$store.state.i.id, c => (c as any).charCodeAt(0)),
+							name: this.$store.state.i.username,
+							displayName: this.$store.state.i.name,
+						},
+						pubKeyCredParams: [{alg: -7, type: 'public-key'}],
+						timeout: 60000,
+						attestation: 'direct'
+					},
+					saving: true
+				};
+				return (navigator as any).credentials.create({
+					publicKey: this.registration.publicKeyOptions
+				});
+			}).then(credential => {
+				this.registration.credential = credential;
+				this.registration.saving = false;
+				this.registration.stage = 1;
+			}).catch(err => {
+				console.warn('Error while registering?', err);
+				this.registration.error = err.message;
+				this.registration.stage = -1;
+			});
+		});
+	}
+
+	public updatePasswordLessLogin() {
+		this.$root.api('i/2fa/password-less', {
+			value: !!this.usePasswordLessLogin
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

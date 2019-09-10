@@ -153,62 +153,62 @@ import { unique } from '../../../../../../prelude/array';
 import { faDownload, faUpload, faUnlockAlt, faBoxes, faCogs } from '@fortawesome/free-solid-svg-icons';
 import { faSave, faEnvelope } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/profile-editor.vue'),
+})
+export default class Vm extends Vue {
 
-	data() {
+	private unique = unique;
+	private langmap = langmap;
+	private host = toUnicode(host);
+	private enableEmail =  false;
+	private email: string;
+	private name: string;
+	private username: string;
+	private location: string;
+	private description: string;
+	private fieldName0: string;
+	private fieldValue0: string;
+	private fieldName1: string;
+	private fieldValue1: string;
+	private fieldName2: string;
+	private fieldValue2: string;
+	private fieldName3: string;
+	private fieldValue3: string;
+	private lang: string;
+	private sex = 'not-known';
+	private birthday: string;
+	private avatarId: string;
+	private bannerId: string;
+	private isCat = false;
+	private isBot = false;
+	private isLocked = false;
+	private carefulBot = false;
+	private autoAcceptFollowed = false;
+	private saving = false;
+	private avatarUploading = false;
+	private bannerUploading = false;
+	private exportTarget = 'notes';
+	private faDownload = faDownload;
+	private faUpload = faUpload;
+	private faSave = faSave;
+	private faEnvelope = faEnvelope;
+	private faUnlockAlt = faUnlockAlt;
+	private faBoxes = faBoxes;
+	private faCogs = faCogs;
+
+	public get alwaysMarkNsfw() { return this.$store.state.i.alwaysMarkNsfw; },
+	public set alwaysMarkNsfw(value) { this.$root.api('i/update', { alwaysMarkNsfw: value }); }
+
+	public get bannerStyle() {
+		if (this.$store.state.i.bannerUrl == null) return {};
 		return {
-			unique,
-			langmap,
-			host: toUnicode(host),
-			enableEmail: false,
-			email: null,
-			name: null,
-			username: null,
-			location: null,
-			description: null,
-			fieldName0: null,
-			fieldValue0: null,
-			fieldName1: null,
-			fieldValue1: null,
-			fieldName2: null,
-			fieldValue2: null,
-			fieldName3: null,
-			fieldValue3: null,
-			lang: null,
-			sex: 'not-known',
-			birthday: null,
-			avatarId: null,
-			bannerId: null,
-			isCat: false,
-			isBot: false,
-			isLocked: false,
-			carefulBot: false,
-			autoAcceptFollowed: false,
-			saving: false,
-			avatarUploading: false,
-			bannerUploading: false,
-			exportTarget: 'notes',
-			faDownload, faUpload, faSave, faEnvelope, faUnlockAlt, faBoxes, faCogs
+			backgroundColor: this.$store.state.i.bannerColor,
+			backgroundImage: `url(${ this.$store.state.i.bannerUrl })`
 		};
-	},
+	}
 
-	computed: {
-		alwaysMarkNsfw: {
-			get() { return this.$store.state.i.alwaysMarkNsfw; },
-			set(value) { this.$root.api('i/update', { alwaysMarkNsfw: value }); }
-		},
-
-		bannerStyle(): any {
-			if (this.$store.state.i.bannerUrl == null) return {};
-			return {
-				backgroundColor: this.$store.state.i.bannerColor,
-				backgroundImage: `url(${ this.$store.state.i.bannerUrl })`
-			};
-		},
-	},
-
-	created() {
+	public created() {
 		this.$root.getMeta().then(meta => {
 			this.enableEmail = meta.enableEmail;
 		});
@@ -236,193 +236,191 @@ export default Vue.extend({
 		this.fieldValue2 = this.$store.state.i.fields[2] ? this.$store.state.i.fields[2].value : null;
 		this.fieldName3 = this.$store.state.i.fields[3] ? this.$store.state.i.fields[3].name : null;
 		this.fieldValue3 = this.$store.state.i.fields[3] ? this.$store.state.i.fields[3].value : null;
-	},
+	}
 
-	methods: {
-		onAvatarChange([file]) {
-			this.avatarUploading = true;
+	public onAvatarChange([file]) {
+		this.avatarUploading = true;
 
-			const data = new FormData();
-			data.append('file', file);
-			data.append('i', this.$store.state.i.token);
+		const data = new FormData();
+		data.append('file', file);
+		data.append('i', this.$store.state.i.token);
 
-			fetch(apiUrl + '/drive/files/create', {
-				method: 'POST',
-				body: data
+		fetch(apiUrl + '/drive/files/create', {
+			method: 'POST',
+			body: data
+		})
+			.then(response => response.json())
+			.then(f => {
+				this.avatarId = f.id;
+				this.avatarUploading = false;
 			})
-				.then(response => response.json())
-				.then(f => {
-					this.avatarId = f.id;
-					this.avatarUploading = false;
-				})
-				.catch(e => {
-					this.avatarUploading = false;
-					alert('%18n:@upload-failed%');
-				});
-		},
+			.catch(e => {
+				this.avatarUploading = false;
+				alert('%18n:@upload-failed%');
+			});
+	}
 
-		onBannerChange([file]) {
-			this.bannerUploading = true;
+	public onBannerChange([file]) {
+		this.bannerUploading = true;
 
-			const data = new FormData();
-			data.append('file', file);
-			data.append('i', this.$store.state.i.token);
+		const data = new FormData();
+		data.append('file', file);
+		data.append('i', this.$store.state.i.token);
 
-			fetch(apiUrl + '/drive/files/create', {
-				method: 'POST',
-				body: data
+		fetch(apiUrl + '/drive/files/create', {
+			method: 'POST',
+			body: data
+		})
+			.then(response => response.json())
+			.then(f => {
+				this.bannerId = f.id;
+				this.bannerUploading = false;
 			})
-				.then(response => response.json())
-				.then(f => {
-					this.bannerId = f.id;
-					this.bannerUploading = false;
-				})
-				.catch(e => {
-					this.bannerUploading = false;
-					alert('%18n:@upload-failed%');
-				});
-		},
-
-		save(notify) {
-			const fields = [
-				{ name: this.fieldName0, value: this.fieldValue0 },
-				{ name: this.fieldName1, value: this.fieldValue1 },
-				{ name: this.fieldName2, value: this.fieldValue2 },
-				{ name: this.fieldName3, value: this.fieldValue3 },
-			];
-
-			this.saving = true;
-
-			this.$root.api('i/update', {
-				name: this.name || null,
-				location: this.location || null,
-				description: this.description || null,
-				lang: this.lang,
-				birthday: this.birthday || null,
-				avatarId: this.avatarId || undefined,
-				bannerId: this.bannerId || undefined,
-				fields,
-				sex: this.sex,
-				isCat: !!this.isCat,
-				isBot: !!this.isBot,
-				isLocked: !!this.isLocked,
-				carefulBot: !!this.carefulBot,
-				autoAcceptFollowed: !!this.autoAcceptFollowed
-			}).then(i => {
-				this.saving = false;
-				this.$store.state.i.avatarId = i.avatarId;
-				this.$store.state.i.avatarUrl = i.avatarUrl;
-				this.$store.state.i.bannerId = i.bannerId;
-				this.$store.state.i.bannerUrl = i.bannerUrl;
-
-				if (notify) {
-					this.$root.dialog({
-						type: 'success',
-						text: this.$t('saved')
-					});
-				}
-			}).catch(err => {
-				this.saving = false;
-				switch(err.id) {
-					case 'f419f9f8-2f4d-46b1-9fb4-49d3a2fd7191':
-						this.$root.dialog({
-							type: 'error',
-							title: this.$t('unable-to-process'),
-							text: this.$t('avatar-not-an-image')
-						});
-						break;
-					case '75aedb19-2afd-4e6d-87fc-67941256fa60':
-						this.$root.dialog({
-							type: 'error',
-							title: this.$t('unable-to-process'),
-							text: this.$t('banner-not-an-image')
-						});
-						break;
-					default:
-						this.$root.dialog({
-							type: 'error',
-							text: this.$t('unable-to-process')
-						});
-				}
+			.catch(e => {
+				this.bannerUploading = false;
+				alert('%18n:@upload-failed%');
 			});
-		},
+	}
 
-		updateEmail() {
-			this.$root.dialog({
-				title: this.$t('@.enter-password'),
-				input: {
-					type: 'password'
-				}
-			}).then(({ canceled, result: password }) => {
-				if (canceled) return;
-				this.$root.api('i/update_email', {
-					password: password,
-					email: this.email == '' ? null : this.email
-				});
-			});
-		},
+	public save(notify) {
+		const fields = [
+			{ name: this.fieldName0, value: this.fieldValue0 },
+			{ name: this.fieldName1, value: this.fieldValue1 },
+			{ name: this.fieldName2, value: this.fieldValue2 },
+			{ name: this.fieldName3, value: this.fieldValue3 },
+		];
 
-		doExport() {
-			this.$root.api(
-				this.exportTarget == 'notes' ? 'i/export-notes' :
-				this.exportTarget == 'following' ? 'i/export-following' :
-				this.exportTarget == 'mute' ? 'i/export-mute' :
-				this.exportTarget == 'blocking' ? 'i/export-blocking' :
-				this.exportTarget == 'user-lists' ? 'i/export-user-lists' :
-				null, {}).then(() => {
-					this.$root.dialog({
-						type: 'info',
-						text: this.$t('export-requested')
-					});
-				}).catch((e: any) => {
-					this.$root.dialog({
-						type: 'error',
-						text: e.message
-					});
-				});
-		},
+		this.saving = true;
 
-		doImport() {
-			this.$chooseDriveFile().then(file => {
-				this.$root.api(
-					this.exportTarget == 'following' ? 'i/import-following' :
-					this.exportTarget == 'user-lists' ? 'i/import-user-lists' :
-					null, {
-						fileId: file.id
-				}).then(() => {
-					this.$root.dialog({
-						type: 'info',
-						text: this.$t('import-requested')
-					});
-				}).catch((e: any) => {
-					this.$root.dialog({
-						type: 'error',
-						text: e.message
-					});
-				});
-			});
-		},
+		this.$root.api('i/update', {
+			name: this.name || null,
+			location: this.location || null,
+			description: this.description || null,
+			lang: this.lang,
+			birthday: this.birthday || null,
+			avatarId: this.avatarId || undefined,
+			bannerId: this.bannerId || undefined,
+			fields,
+			sex: this.sex,
+			isCat: !!this.isCat,
+			isBot: !!this.isBot,
+			isLocked: !!this.isLocked,
+			carefulBot: !!this.carefulBot,
+			autoAcceptFollowed: !!this.autoAcceptFollowed
+		}).then(i => {
+			this.saving = false;
+			this.$store.state.i.avatarId = i.avatarId;
+			this.$store.state.i.avatarUrl = i.avatarUrl;
+			this.$store.state.i.bannerId = i.bannerId;
+			this.$store.state.i.bannerUrl = i.bannerUrl;
 
-		async deleteAccount() {
-			const { canceled: canceled, result: password } = await this.$root.dialog({
-				title: this.$t('enter-password'),
-				input: {
-					type: 'password'
-				}
-			});
-			if (canceled) return;
-
-			this.$root.api('i/delete-account', {
-				password
-			}).then(() => {
+			if (notify) {
 				this.$root.dialog({
 					type: 'success',
-					text: this.$t('account-deleted')
+					text: this.$t('saved')
+				});
+			}
+		}).catch(err => {
+			this.saving = false;
+			switch(err.id) {
+				case 'f419f9f8-2f4d-46b1-9fb4-49d3a2fd7191':
+					this.$root.dialog({
+						type: 'error',
+						title: this.$t('unable-to-process'),
+						text: this.$t('avatar-not-an-image')
+					});
+					break;
+				case '75aedb19-2afd-4e6d-87fc-67941256fa60':
+					this.$root.dialog({
+						type: 'error',
+						title: this.$t('unable-to-process'),
+						text: this.$t('banner-not-an-image')
+					});
+					break;
+				default:
+					this.$root.dialog({
+						type: 'error',
+						text: this.$t('unable-to-process')
+					});
+			}
+		});
+	}
+
+	public updateEmail() {
+		this.$root.dialog({
+			title: this.$t('@.enter-password'),
+			input: {
+				type: 'password'
+			}
+		}).then(({ canceled, result: password }) => {
+			if (canceled) return;
+			this.$root.api('i/update_email', {
+				password: password,
+				email: this.email == '' ? null : this.email
+			});
+		});
+	}
+
+	public doExport() {
+		this.$root.api(
+			this.exportTarget == 'notes' ? 'i/export-notes' :
+			this.exportTarget == 'following' ? 'i/export-following' :
+			this.exportTarget == 'mute' ? 'i/export-mute' :
+			this.exportTarget == 'blocking' ? 'i/export-blocking' :
+			this.exportTarget == 'user-lists' ? 'i/export-user-lists' :
+			null, {}).then(() => {
+				this.$root.dialog({
+					type: 'info',
+					text: this.$t('export-requested')
+				});
+			}).catch((e: any) => {
+				this.$root.dialog({
+					type: 'error',
+					text: e.message
 				});
 			});
-		}
 	}
-});
+
+	public doImport() {
+		this.$chooseDriveFile().then(file => {
+			this.$root.api(
+				this.exportTarget == 'following' ? 'i/import-following' :
+				this.exportTarget == 'user-lists' ? 'i/import-user-lists' :
+				null, {
+					fileId: file.id
+			}).then(() => {
+				this.$root.dialog({
+					type: 'info',
+					text: this.$t('import-requested')
+				});
+			}).catch((e: any) => {
+				this.$root.dialog({
+					type: 'error',
+					text: e.message
+				});
+			});
+		});
+	}
+
+	public async deleteAccount() {
+		const { canceled: canceled, result: password } = await this.$root.dialog({
+			title: this.$t('enter-password'),
+			input: {
+				type: 'password'
+			}
+		});
+		if (canceled) return;
+
+		this.$root.api('i/delete-account', {
+			password
+		}).then(() => {
+			this.$root.dialog({
+				type: 'success',
+				text: this.$t('account-deleted')
+			});
+		});
+	}
+}
 </script>
 
 <style lang="stylus" scoped>
