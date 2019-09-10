@@ -6,51 +6,46 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import i18n from '../../../../../i18n';
 import XGame from './reversi.game.vue';
 import XRoom from './reversi.room.vue';
+import { Connection } from '../../../../scripts/Connection';
+import { ReversiGame } from '../../../../../../../models/entities/games/reversi/game';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/games/reversi/reversi.gameroom.vue'),
 	components: {
 		XGame,
 		XRoom
 	},
-	props: {
-		game: {
-			type: Object,
-			required: true
-		},
-		selfNav: {
-			type: Boolean,
-			require: true
-		}
-	},
-	data() {
-		return {
-			connection: null,
-			g: null
-		};
-	},
-	created() {
+})
+export default class ReversiGameRoom extends Vue {
+	@Prop() private readonly game!: ReversiGame;
+	@Prop() private readonly selfNav!: boolean;
+
+	private connection: Connection;
+	private g: any;
+
+	public created() {
 		this.g = this.game;
 		this.connection = this.$root.stream.connectToChannel('gamesReversiGame', {
 			gameId: this.game.id
 		});
 		this.connection.on('started', this.onStarted);
-	},
-	beforeDestroy() {
-		this.connection.dispose();
-	},
-	methods: {
-		onStarted(game) {
-			Object.assign(this.g, game);
-			this.$forceUpdate();
-		},
-		goIndex() {
-			this.$emit('go-index');
-		}
 	}
-});
+
+	public beforeDestroy() {
+		this.connection.dispose();
+	}
+
+	public onStarted(game) {
+		Object.assign(this.g, game);
+		this.$forceUpdate();
+	}
+
+	public goIndex() {
+		this.$emit('go-index');
+	}
+}
 </script>

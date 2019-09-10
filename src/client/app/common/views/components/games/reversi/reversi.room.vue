@@ -11,7 +11,7 @@
 					<option label="-Custom-" :value="mapName" v-if="mapName == '-Custom-'"/>
 					<option :label="$t('random')" :value="null"/>
 					<optgroup v-for="c in mapCategories" :key="c" :label="c">
-						<option v-for="m in maps" v-if="m.category == c" :key="m.name" :label="m.name" :value="m.name">{{ m.name }}</option>
+						<option v-for="m in maps.filter(ma => ma.category == c)" :key="m.name" :label="m.name" :value="m.name">{{ m.name }}</option>
 					</optgroup>
 				</select>
 			</header>
@@ -20,6 +20,7 @@
 				<div class="random" v-if="game.map == null"><fa icon="dice"/></div>
 				<div class="board" v-else :style="{ 'grid-template-rows': `repeat(${ game.map.length }, 1fr)`, 'grid-template-columns': `repeat(${ game.map[0].length }, 1fr)` }">
 					<div v-for="(x, i) in game.map.join('')"
+							:key="i"
 							:data-none="x == ' '"
 							@click="onPixelClick(i, x)">
 						<fa v-if="x == 'b'" :icon="fasCircle"/>
@@ -114,46 +115,48 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import i18n from '../../../../../i18n';
 import * as maps from '../../../../../../../games/reversi/maps';
 import { faCircle as fasCircle } from '@fortawesome/free-solid-svg-icons';
 import { faCircle as farCircle } from '@fortawesome/free-regular-svg-icons';
+import { ReversiGame } from '../../../../../../../models/entities/games/reversi/game';
+import { Connection } from '../../../../scripts/Connection';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/games/reversi/reversi.room.vue'),
-	props: ['game', 'connection'],
+})
+export default class ReversiRoom extends Vue {
+	@Prop() private game!: ReversiGame;
+	@Prop() private connection!: Connection;
 
-	data() {
-		return {
-			o: null,
-			isLlotheo: false,
-			mapName: maps.eighteight.name,
-			maps: maps,
-			form: null,
-			messages: [],
-			fasCircle, farCircle
-		};
-	},
+		private o: null;
+		private isLlotheo = false;
+		private mapName = maps.eighteight.name;
+		private maps = maps;
+		private form: any;
+		private messages = [] as any[];
+		private fasCircle = fasCircle;
+		private farCircle = farCircle;
 
-	computed: {
-		mapCategories(): string[] {
+		public get mapCategories(): string[] {
 			const categories = Object.values(maps).map(x => x.category);
-			return categories.filter((item, pos) => categories.indexOf(item) == pos);
-		},
-		isAccepted(): boolean {
+			return categories.filter((item, pos) => item !== undefined && categories.indexOf(item) == pos) as string[];
+		}
+
+		public get isAccepted(): boolean {
 			if (this.game.user1Id == this.$store.state.i.id && this.game.user1Accepted) return true;
 			if (this.game.user2Id == this.$store.state.i.id && this.game.user2Accepted) return true;
 			return false;
-		},
-		isOpAccepted(): boolean {
+		}
+
+		public get isOpAccepted(): boolean {
 			if (this.game.user1Id != this.$store.state.i.id && this.game.user1Accepted) return true;
 			if (this.game.user2Id != this.$store.state.i.id && this.game.user2Accepted) return true;
 			return false;
 		}
-	},
 
-	created() {
+	public created() {
 		this.connection.on('changeAccepts', this.onChangeAccepts);
 		this.connection.on('updateSettings', this.onUpdateSettings);
 		this.connection.on('initForm', this.onInitForm);
@@ -161,94 +164,92 @@ export default Vue.extend({
 
 		if (this.game.user1Id != this.$store.state.i.id && this.game.form1) this.form = this.game.form1;
 		if (this.game.user2Id != this.$store.state.i.id && this.game.form2) this.form = this.game.form2;
-	},
+	}
 
-	beforeDestroy() {
+	public beforeDestroy() {
 		this.connection.off('changeAccepts', this.onChangeAccepts);
 		this.connection.off('updateSettings', this.onUpdateSettings);
 		this.connection.off('initForm', this.onInitForm);
 		this.connection.off('message', this.onMessage);
-	},
+	}
 
-	methods: {
-		exit() {
+	public exit() {
 
-		},
+	}
 
-		accept() {
-			this.connection.send('accept', {});
-		},
+	public accept() {
+		this.connection.send('accept', {});
+	}
 
-		cancel() {
-			this.connection.send('cancelAccept', {});
-		},
+	public cancel() {
+		this.connection.send('cancelAccept', {});
+	}
 
-		onChangeAccepts(accepts) {
-			this.game.user1Accepted = accepts.user1;
-			this.game.user2Accepted = accepts.user2;
-			this.$forceUpdate();
-		},
+	public onChangeAccepts(accepts) {
+		this.game.user1Accepted = accepts.user1;
+		this.game.user2Accepted = accepts.user2;
+		this.$forceUpdate();
+	}
 
-		updateSettings(key: string) {
-			this.connection.send('updateSettings', {
-				key: key,
-				value: this.game[key]
-			});
-		},
+	public updateSettings(key: string) {
+		this.connection.send('updateSettings', {
+			key: key,
+			value: this.game[key]
+		});
+	}
 
-		onUpdateSettings({ key, value }) {
-			this.game[key] = value;
-			if (this.game.map == null) {
-				this.mapName = null;
-			} else {
-				const found = Object.values(maps).find(x => x.data.join('') == this.game.map.join(''));
-				this.mapName = found ? found.name : '-Custom-';
-			}
-		},
-
-		onInitForm(x) {
-			if (x.userId == this.$store.state.i.id) return;
-			this.form = x.form;
-		},
-
-		onMessage(x) {
-			if (x.userId == this.$store.state.i.id) return;
-			this.messages.unshift(x.message);
-		},
-
-		onChangeForm(item) {
-			this.connection.send('updateForm', {
-				id: item.id,
-				value: item.value
-			});
-		},
-
-		onMapChange() {
-			if (this.mapName == null) {
-				this.game.map = null;
-			} else {
-				this.game.map = Object.values(maps).find(x => x.name == this.mapName).data;
-			}
-			this.$forceUpdate();
-			this.updateSettings('map');
-		},
-
-		onPixelClick(pos, pixel) {
-			const x = pos % this.game.map[0].length;
-			const y = Math.floor(pos / this.game.map[0].length);
-			const newPixel =
-				pixel == ' ' ? '-' :
-				pixel == '-' ? 'b' :
-				pixel == 'b' ? 'w' :
-				' ';
-			const line = this.game.map[y].split('');
-			line[x] = newPixel;
-			this.$set(this.game.map, y, line.join(''));
-			this.$forceUpdate();
-			this.updateSettings('map');
+	public onUpdateSettings({ key, value }) {
+		this.game[key] = value;
+		if (!this.game.map) {
+			this.mapName = undefined;
+		} else {
+			const found = Object.values(maps).find(x => x.data.join('') == this.game.map.join(''));
+			this.mapName = found ? found.name : '-Custom-';
 		}
 	}
-});
+
+	public onInitForm(x) {
+		if (x.userId == this.$store.state.i.id) return;
+		this.form = x.form;
+	}
+
+	public onMessage(x) {
+		if (x.userId == this.$store.state.i.id) return;
+		this.messages.unshift(x.message);
+	}
+
+	public onChangeForm(item) {
+		this.connection.send('updateForm', {
+			id: item.id,
+			value: item.value
+		});
+	}
+
+	public onMapChange() {
+		if (!this.mapName) {
+			this.game.map = [];
+		} else {
+			this.game.map = Object.values(maps).find(x => x.name == this.mapName)!.data;
+		}
+		this.$forceUpdate();
+		this.updateSettings('map');
+	}
+
+	public onPixelClick(pos, pixel) {
+		const x = pos % this.game.map[0].length;
+		const y = Math.floor(pos / this.game.map[0].length);
+		const newPixel =
+			pixel == ' ' ? '-' :
+			pixel == '-' ? 'b' :
+			pixel == 'b' ? 'w' :
+			' ';
+		const line = this.game.map[y].split('');
+		line[x] = newPixel;
+		this.$set(this.game.map, y, line.join(''));
+		this.$forceUpdate();
+		this.updateSettings('map');
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

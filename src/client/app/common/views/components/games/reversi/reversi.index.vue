@@ -17,7 +17,7 @@
 	</div>
 	<section v-if="invitations.length > 0">
 		<h2>{{ $t('invitations') }}</h2>
-		<div class="invitation" v-for="i in invitations" tabindex="-1" @click="accept(i)">
+		<div class="invitation" v-for="i in invitations" :key="i.id" tabindex="-1" @click="accept(i)">
 			<mk-avatar class="avatar" :user="i.parent"/>
 			<span class="name"><b><mk-user-name :user="i.parent"/></b></span>
 			<span class="username">@{{ i.parent.username }}</span>
@@ -26,7 +26,7 @@
 	</section>
 	<section v-if="myGames.length > 0">
 		<h2>{{ $t('my-games') }}</h2>
-		<a class="game" v-for="g in myGames" tabindex="-1" @click.prevent="go(g)" :href="`/games/reversi/${g.id}`">
+		<a class="game" v-for="g in myGames" :key="g.id" tabindex="-1" @click.prevent="go(g)" :href="`/games/reversi/${g.id}`">
 			<mk-avatar class="avatar" :user="g.user1"/>
 			<mk-avatar class="avatar" :user="g.user2"/>
 			<span><b><mk-user-name :user="g.user1"/></b> vs <b><mk-user-name :user="g.user2"/></b></span>
@@ -36,7 +36,7 @@
 	</section>
 	<section v-if="games.length > 0">
 		<h2>{{ $t('all-games') }}</h2>
-		<a class="game" v-for="g in games" tabindex="-1" @click.prevent="go(g)" :href="`/games/reversi/${g.id}`">
+		<a class="game" v-for="g in games" :key="g.id" tabindex="-1" @click.prevent="go(g)" :href="`/games/reversi/${g.id}`">
 			<mk-avatar class="avatar" :user="g.user1"/>
 			<mk-avatar class="avatar" :user="g.user2"/>
 			<span><b><mk-user-name :user="g.user1"/></b> vs <b><mk-user-name :user="g.user2"/></b></span>
@@ -50,22 +50,22 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../../../i18n';
+import { ReversiMatching } from '../../../../../../../models/entities/games/reversi/matching';
+import { Connection } from '../../../../scripts/Connection';
+import { ReversiGame } from '../../../../../../../models/entities/games/reversi/game';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/games/reversi/reversi.index.vue'),
-	data() {
-		return {
-			games: [],
-			gamesFetching: true,
-			gamesMoreFetching: false,
-			myGames: [],
-			matching: null,
-			invitations: [],
-			connection: null
-		};
-	},
+})
+export default class ReversiIndex extends Vue {
+	private games: ReversiGame[];
+	private gamesFetching = true;
+	private gamesMoreFetching = false;
+	private myGames: ReversiGame[];
+	private invitations: ReversiMatching[];
+	private connection: Connection;
 
-	mounted() {
+	public mounted() {
 		if (this.$store.getters.isSignedIn) {
 			this.connection = this.$root.stream.useSharedConnection('gamesReversi');
 
@@ -86,53 +86,51 @@ export default Vue.extend({
 			this.games = games;
 			this.gamesFetching = false;
 		});
-	},
+	}
 
-	beforeDestroy() {
+	public beforeDestroy() {
 		if (this.connection) {
 			this.connection.dispose();
 		}
-	},
-
-	methods: {
-		go(game) {
-			this.$emit('go', game);
-		},
-
-		async match() {
-			const { result: user } = await this.$root.dialog({
-				title: this.$t('enter-username'),
-				user: {
-					local: true
-				}
-			});
-			if (user == null) return;
-			this.$root.api('games/reversi/match', {
-				userId: user.id
-			}).then(res => {
-				if (res == null) {
-					this.$emit('matching', user);
-				} else {
-					this.$emit('go', res);
-				}
-			});
-		},
-
-		accept(invitation) {
-			this.$root.api('games/reversi/match', {
-				userId: invitation.parent.id
-			}).then(game => {
-				if (game) {
-					this.$emit('go', game);
-				}
-			});
-		},
-
-		onInvited(invite) {
-			this.invitations.unshift(invite);
-		}
 	}
-});
+
+	public go(game) {
+		this.$emit('go', game);
+	}
+
+	public async match() {
+		const { result: user } = await this.$root.dialog({
+			title: this.$t('enter-username'),
+			user: {
+				local: true
+			}
+		});
+		if (user == null) return;
+		this.$root.api('games/reversi/match', {
+			userId: user.id
+		}).then(res => {
+			if (res == null) {
+				this.$emit('matching', user);
+			} else {
+				this.$emit('go', res);
+			}
+		});
+	}
+
+	public accept(invitation) {
+		this.$root.api('games/reversi/match', {
+			userId: invitation.parent.id
+		}).then(game => {
+			if (game) {
+				this.$emit('go', game);
+			}
+		});
+	}
+
+	public onInvited(invite) {
+		this.invitations.unshift(invite);
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

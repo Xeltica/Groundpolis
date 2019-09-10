@@ -19,51 +19,47 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import i18n from '../../../../../i18n';
 import XGameroom from './reversi.gameroom.vue';
 import XIndex from './reversi.index.vue';
 import Progress from '../../../../scripts/loading';
+import { ReversiGame } from '../../../../../../../models/entities/games/reversi/game';
+import { Connection } from '../../../../scripts/Connection';
+import { User } from '../../../../../../../models/entities/user';
 
-export default Vue.extend({
+@Component({
 	i18n: i18n('common/views/components/games/reversi/reversi.vue'),
 	components: {
 		XGameroom,
 		XIndex
 	},
+})
+export default class Reversi extends Vue {
 
-	props: {
-		gameId: {
-			type: String,
-			required: false
-		},
-		selfNav: {
-			type: Boolean,
-			require: false,
-			default: true
-		}
-	},
+	@Prop() private readonly gameId!: string;
 
-	data() {
-		return {
-			game: null,
-			matching: null,
-			connection: null,
-			pingClock: null
-		};
-	},
+	@Prop({
+		default: true,
+	})
+	private readonly selfNav: boolean;
 
-	watch: {
-		game() {
-			this.$emit('gamed', this.game);
-		},
+	private game: ReversiGame | null;
+	private matching: User | null;
+	private connection: Connection;
+	private pingClock: number;
 
-		gameId() {
-			this.fetch();
-		}
-	},
+	@Watch('game')
+	public watchGame() {
+		this.$emit('gamed', this.game);
+	}
 
-	mounted() {
+	@Watch('gameId')
+	public watchGameId() {
+		this.fetch();
+	}
+
+	public mounted() {
 		this.fetch();
 
 		if (this.$store.getters.isSignedIn) {
@@ -71,7 +67,7 @@ export default Vue.extend({
 
 			this.connection.on('matched', this.onMatched);
 
-			this.pingClock = setInterval(() => {
+			this.pingClock = window.setInterval(() => {
 				if (this.matching) {
 					this.connection.send('ping', {
 						id: this.matching.id
@@ -79,77 +75,75 @@ export default Vue.extend({
 				}
 			}, 3000);
 		}
-	},
+	}
 
-	beforeDestroy() {
+	public beforeDestroy() {
 		if (this.connection) {
 			this.connection.dispose();
 			clearInterval(this.pingClock);
 		}
-	},
+	}
 
-	methods: {
-		fetch() {
-			if (this.gameId == null) {
-				this.game = null;
-			} else {
-				Progress.start();
-				this.$root.api('games/reversi/games/show', {
-					gameId: this.gameId
-				}).then(game => {
-					this.game = game;
-					Progress.done();
-				});
-			}
-		},
-
-		async nav(game, actualNav = true) {
-			if (this.selfNav) {
-				// 受け取ったゲーム情報が省略されたものなら完全な情報を取得する
-				if (game != null && game.map == null) {
-					game = await this.$root.api('games/reversi/games/show', {
-						gameId: game.id
-					});
-				}
-
-				this.game = game;
-			} else {
-				this.$emit('nav', game, actualNav);
-			}
-		},
-
-		onMatching(user) {
-			this.matching = user;
-		},
-
-		cancel() {
-			this.matching = null;
-			this.$root.api('games/reversi/match/cancel');
-		},
-
-		accept(invitation) {
-			this.$root.api('games/reversi/match', {
-				userId: invitation.parent.id
+	public fetch() {
+		if (this.gameId == null) {
+			this.game = null;
+		} else {
+			Progress.start();
+			this.$root.api('games/reversi/games/show', {
+				gameId: this.gameId
 			}).then(game => {
-				if (game) {
-					this.matching = null;
-
-					this.nav(game);
-				}
+				this.game = game;
+				Progress.done();
 			});
-		},
-
-		onMatched(game) {
-			this.matching = null;
-			this.game = game;
-			this.nav(game, false);
-		},
-
-		goIndex() {
-			this.nav(null);
 		}
 	}
-});
+
+	public async nav(game, actualNav = true) {
+		if (this.selfNav) {
+			// 受け取ったゲーム情報が省略されたものなら完全な情報を取得する
+			if (game != null && game.map == null) {
+				game = await this.$root.api('games/reversi/games/show', {
+					gameId: game.id
+				});
+			}
+
+			this.game = game;
+		} else {
+			this.$emit('nav', game, actualNav);
+		}
+	}
+
+	public onMatching(user) {
+		this.matching = user;
+	}
+
+	public cancel() {
+		this.matching = null;
+		this.$root.api('games/reversi/match/cancel');
+	}
+
+	public accept(invitation) {
+		this.$root.api('games/reversi/match', {
+			userId: invitation.parent.id
+		}).then(game => {
+			if (game) {
+				this.matching = null;
+
+				this.nav(game);
+			}
+		});
+	}
+
+	public onMatched(game) {
+		this.matching = null;
+		this.game = game;
+		this.nav(game, false);
+	}
+
+	public goIndex() {
+		this.nav(null);
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

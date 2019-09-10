@@ -89,12 +89,13 @@ import { faAngleDoubleLeft, faAngleLeft, faAngleRight, faAngleDoubleRight } from
 import { faCircle as fasCircle } from '@fortawesome/free-solid-svg-icons';
 import { faCircle as farCircle } from '@fortawesome/free-regular-svg-icons';
 import { Connection } from '../../../../scripts/Connection';
+import { ReversiGame as Game } from '../../../../../../../models/entities/games/reversi/game';
 
 @Component({
 	i18n: i18n('common/views/components/games/reversi/reversi.game.vue'),
 })
 export default class ReversiGame extends Vue {
-	@Prop() private readonly initGame!: any;
+	@Prop() private readonly initGame!: Game;
 	@Prop() private readonly connection!: Connection;
 	@Prop() private readonly selfNav!: true;
 
