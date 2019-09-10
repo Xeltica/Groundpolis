@@ -1,5 +1,5 @@
 <template>
-<div class="ui-select" :class="[{ focused, disabled, filled, inline }, styl]">
+<div class="ui-select" :class="[{ focused, disabled, filled, _inline }, styl]">
 	<div class="icon" ref="icon"><slot name="icon"></slot></div>
 	<div class="input" @click="focus">
 		<span class="label" ref="label"><slot name="label"></slot></span>
@@ -20,68 +20,51 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Inject, Prop, Ref } from 'vue-property-decorator';
 
-export default Vue.extend({
-	inject: {
-		horizonGrouped: {
-			default: false
-		}
-	},
-	props: {
-		value: {
-			required: false
-		},
-		required: {
-			type: Boolean,
-			required: false
-		},
-		disabled: {
-			type: Boolean,
-			required: false
-		},
-		styl: {
-			type: String,
-			required: false,
-			default: 'line'
-		},
-		inline: {
-			type: Boolean,
-			required: false,
-			default(): boolean {
-				return this.horizonGrouped;
-			}
-		},
-	},
-	data() {
-		return {
-			focused: false
-		};
-	},
-	computed: {
-		v: {
-			get() {
-				return this.value;
-			},
-			set(v) {
-				this.$emit('input', v);
-			}
-		},
-		filled(): boolean {
-			return this.v != '' && this.v != null;
-		}
-	},
-	mounted() {
-		if (this.$refs.prefix) {
-			this.$refs.label.style.left = (this.$refs.prefix.offsetLeft + this.$refs.prefix.offsetWidth) + 'px';
-		}
-	},
-	methods: {
-		focus() {
-			this.$refs.input.focus();
+@Component
+export default class Select extends Vue {
+	@Inject({ default: false }) private horizonGrouped: boolean;
+
+	@Prop() private value;
+	@Prop() private required: boolean;
+	@Prop() private disabled: boolean;
+	@Prop({ default: 'line' }) private styl: string;
+	@Prop({ default: null }) private inline: boolean | null;
+
+	@Ref() private icon: HTMLElement;
+	@Ref() private label: HTMLElement;
+	@Ref() private prefix: HTMLElement;
+	@Ref() private input: HTMLElement;
+
+	public get _inline() {
+		return this.inline === null ? this.horizonGrouped : this.inline;
+	}
+
+	private focused = false;
+
+	public get v() {
+		return this.value;
+	}
+
+	public set v(v) {
+		this.$emit('input', v);
+	}
+
+	public get filled(): boolean {
+		return this.v != '' && this.v != null;
+	}
+
+	public mounted() {
+		if (this.prefix) {
+			this.label.style.left = (this.prefix.offsetLeft + this.prefix.offsetWidth) + 'px';
 		}
 	}
-});
+
+	public focus() {
+		this.input.focus();
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

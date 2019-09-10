@@ -10,22 +10,19 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import paging from '../../../scripts/paging';
 
-export default Vue.extend({
+@Component({
 	mixins: [
 		paging({
 			captureWindowScroll: false,
 		}),
 	],
-
-	props: {
-		pagination: {
-			required: true
-		},
-	},
-});
+})
+export default class Pagination extends Vue {
+	@Prop() private pagination;
+}
 </script>
 
 <style lang="stylus" scoped>

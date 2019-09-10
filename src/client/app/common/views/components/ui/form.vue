@@ -7,15 +7,11 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	props: {
-		disabled: {
-			type: Boolean,
-			required: false
-		}
-	}
-});
+import { Vue, Component, Prop } from 'vue-property-decorator';
+@Component
+export default class Form extends Vue {
+	@Prop() private disabled: boolean;
+}
 </script>
 
 <style lang="stylus" scoped>

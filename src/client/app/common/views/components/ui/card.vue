@@ -9,14 +9,11 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	provide() {
-		return {
-			isCardChild: true
-		};
-	}
-});
+import { Vue, Component, Provide } from 'vue-property-decorator';
+@Component
+export default class Card extends Vue {
+	@Provide() private isCardChild = true;
+}
 </script>
 
 <style lang="stylus" scoped>

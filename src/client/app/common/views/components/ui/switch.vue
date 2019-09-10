@@ -26,34 +26,21 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	model: {
-		prop: 'value',
-		event: 'change'
-	},
-	props: {
-		value: {
-			type: Boolean,
-			default: false
-		},
-		disabled: {
-			type: Boolean,
-			default: false
-		}
-	},
-	computed: {
-		checked(): boolean {
-			return this.value;
-		}
-	},
-	methods: {
-		toggle() {
-			if (this.disabled) return;
-			this.$emit('change', !this.checked);
-		}
+import { Vue, Component, Model, Prop } from 'vue-property-decorator';
+@Component
+export default class Switch extends Vue {
+	@Model('change', { default: false }) private value: boolean;
+	@Prop({ default: false }) private disabled: boolean;
+
+	public get checked(): boolean {
+		return this.value;
 	}
-});
+
+	public toggle() {
+		if (this.disabled) return;
+		this.$emit('change', !this.checked);
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

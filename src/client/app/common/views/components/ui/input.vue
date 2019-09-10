@@ -1,5 +1,5 @@
 <template>
-<div class="ui-input" :class="[{ focused, filled, inline, disabled }, styl]">
+<div class="ui-input" :class="[{ focused, filled, _inline, disabled }, styl]">
 	<div class="icon" ref="icon"><slot name="icon"></slot></div>
 	<div class="input">
 		<div class="password-meter" v-if="withPasswordMeter" v-show="passwordStrength != ''" :data-strength="passwordStrength">
@@ -43,7 +43,7 @@
 				:list="id"
 			>
 			<datalist :id="id" v-if="datalist">
-				<option v-for="data in datalist" :value="data"/>
+				<option v-for="(data, i) in datalist" :value="data" :key="i"/>
 			</datalist>
 		</template>
 		<template v-else>
@@ -72,140 +72,98 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Inject, Prop, Watch, Ref } from 'vue-property-decorator';
 import debounce from 'v-debounce';
 const getPasswordStrength = require('syuilo-password-strength');
 
-export default Vue.extend({
+@Component({
 	directives: {
 		debounce
 	},
-	inject: {
-		horizonGrouped: {
-			default: false
-		}
-	},
-	props: {
-		value: {
-			required: false
-		},
-		type: {
-			type: String,
-			required: false
-		},
-		required: {
-			type: Boolean,
-			required: false
-		},
-		readonly: {
-			type: Boolean,
-			required: false
-		},
-		disabled: {
-			type: Boolean,
-			required: false
-		},
-		pattern: {
-			type: String,
-			required: false
-		},
-		placeholder: {
-			type: String,
-			required: false
-		},
-		autofocus: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		autocomplete: {
-			required: false
-		},
-		spellcheck: {
-			required: false
-		},
-		debounce: {
-			required: false
-		},
-		withPasswordMeter: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		withPasswordToggle: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		datalist: {
-			type: Array,
-			required: false,
-		},
-		inline: {
-			type: Boolean,
-			required: false,
-			default(): boolean {
-				return this.horizonGrouped;
-			}
-		},
-		styl: {
-			type: String,
-			required: false,
-			default: 'line'
-		}
-	},
-	data() {
-		return {
-			v: this.value,
-			focused: false,
-			passwordStrength: '',
-			id: Math.random().toString()
-		};
-	},
-	computed: {
-		filled(): boolean {
-			return this.v != '' && this.v != null;
-		},
-		filePlaceholder(): string {
-			if (this.type != 'file') return null;
-			if (this.v == null) return null;
+})
+export default class Input extends Vue {
+	@Inject({ default: false }) private horizonGrouped: boolean;
+	@Prop() private value;
+	@Prop() private type: string;
+	@Prop() private required: boolean;
+	@Prop() private readonly: boolean;
+	@Prop() private disabled: boolean;
+	@Prop() private pattern: string;
+	@Prop() private placeholder: string;
+	@Prop({ default: false }) private autofocus: boolean;
+	@Prop() private autocomplete;
+	@Prop() private spellcheck;
+	@Prop() private debounce;
+	@Prop({ default: false }) private withPasswordMeter: boolean;
+	@Prop({ default: false }) private withPasswordToggle: boolean;
+	@Prop() private datalist: any[];
+	@Prop({ default: null }) private inline: boolean | null;
+	@Prop({ default: 'line' }) private styl: string;
 
-			if (typeof this.v == 'string') return this.v;
+	@Ref() private passwordMetar: HTMLElement;
+	@Ref() private icon: HTMLElement;
+	@Ref() private label: HTMLElement;
+	@Ref() private title: HTMLElement;
+	@Ref() private prefix: HTMLElement;
+	@Ref() private input: HTMLElement;
+	@Ref() private file: HTMLElement;
+	@Ref() private suffix: HTMLElement;
 
-			if (Array.isArray(this.v)) {
-				return this.v.map(file => file.name).join(', ');
-			} else {
-				return this.v.name;
-			}
+	private v = this.value;
+	private focused = false;
+	private passwordStrength = '';
+	private id = Math.random().toString();
+
+	public get _inline() {
+		return this.inline === null ? this.horizonGrouped : this.inline;
+	}
+
+	public get filled() {
+		return this.v != '' && this.v != null;
+	}
+
+	public get filePlaceholder(): string | null {
+		if (this.type != 'file') return null;
+		if (this.v == null) return null;
+
+		if (typeof this.v == 'string') return this.v;
+
+		if (Array.isArray(this.v)) {
+			return this.v.map(file => file.name).join(', ');
+		} else {
+			return this.v.name;
 		}
-	},
-	watch: {
-		value(v) {
-			this.v = v;
-		},
-		v(v) {
-			if (this.type === 'number') {
-				this.$emit('input', parseInt(v, 10));
-			} else {
-				this.$emit('input', v);
+	}
+
+	@Watch('value')
+	public watchValue(v) {
+		this.v = v;
+	}
+
+	@Watch('v')
+	public watchV(v) {
+		if (this.type === 'number') {
+			this.$emit('input', parseInt(v, 10));
+		} else {
+			this.$emit('input', v);
+		}
+
+		if (this.withPasswordMeter) {
+			if (v == '') {
+				this.passwordStrength = '';
+				return;
 			}
 
-			if (this.withPasswordMeter) {
-				if (v == '') {
-					this.passwordStrength = '';
-					return;
-				}
-
-				const strength = getPasswordStrength(v);
-				this.passwordStrength = strength > 0.7 ? 'high' : strength > 0.3 ? 'medium' : 'low';
-				(this.$refs.passwordMetar as any).style.width = `${strength * 100}%`;
-			}
+			const strength = getPasswordStrength(v);
+			this.passwordStrength = strength > 0.7 ? 'high' : strength > 0.3 ? 'medium' : 'low';
+			(this.passwordMetar as any).style.width = `${strength * 100}%`;
 		}
-	},
-	mounted() {
+	}
+
+	public mounted() {
 		if (this.autofocus) {
 			this.$nextTick(() => {
-				this.$refs.input.focus();
+				this.input.focus();
 			});
 		}
 
@@ -213,15 +171,15 @@ export default Vue.extend({
 			// このコンポーネントが作成された時、非表示状態である場合がある
 			// 非表示状態だと要素の幅などは0になってしまうので、定期的に計算する
 			const clock = setInterval(() => {
-				if (this.$refs.prefix) {
-					this.$refs.label.style.left = (this.$refs.prefix.offsetLeft + this.$refs.prefix.offsetWidth) + 'px';
-					if (this.$refs.prefix.offsetWidth) {
-						this.$refs.input.style.paddingLeft = this.$refs.prefix.offsetWidth + 'px';
+				if (this.prefix) {
+					this.label.style.left = (this.prefix.offsetLeft + this.prefix.offsetWidth) + 'px';
+					if (this.prefix.offsetWidth) {
+						this.input.style.paddingLeft = this.prefix.offsetWidth + 'px';
 					}
 				}
-				if (this.$refs.suffix) {
-					if (this.$refs.suffix.offsetWidth) {
-						this.$refs.input.style.paddingRight = this.$refs.suffix.offsetWidth + 'px';
+				if (this.suffix) {
+					if (this.suffix.offsetWidth) {
+						this.input.style.paddingRight = this.suffix.offsetWidth + 'px';
 					}
 				}
 			}, 100);
@@ -236,28 +194,30 @@ export default Vue.extend({
 				this.$emit('enter');
 			}
 		});
-	},
-	methods: {
-		focus() {
-			this.$refs.input.focus();
-		},
-		togglePassword() {
-			if (this.type == 'password') {
-				this.type = 'text'
-			} else {
-				this.type = 'password'
-			}
-		},
-		chooseFile() {
-			this.$refs.file.click();
-		},
-		onChangeFile() {
-			this.v = Array.from((this.$refs.file as any).files);
-			this.$emit('input', this.v);
-			this.$emit('change', this.v);
+	}
+
+	public focus() {
+		this.input.focus();
+	}
+
+	public togglePassword() {
+		if (this.type == 'password') {
+			this.type = 'text';
+		} else {
+			this.type = 'password';
 		}
 	}
-});
+
+	public chooseFile() {
+		this.file.click();
+	}
+
+	public onChangeFile() {
+		this.v = Array.from((this.file as any).files);
+		this.$emit('input', this.v);
+		this.$emit('change', this.v);
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

@@ -17,35 +17,22 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	model: {
-		prop: 'model',
-		event: 'change'
-	},
-	props: {
-		model: {
-			required: false
-		},
-		value: {
-			required: false
-		},
-		disabled: {
-			type: Boolean,
-			default: false
-		}
-	},
-	computed: {
-		checked(): boolean {
-			return this.model === this.value;
-		}
-	},
-	methods: {
-		toggle() {
-			this.$emit('change', this.value);
-		}
+import { Vue, Component, Model, Prop } from 'vue-property-decorator';
+@Component
+export default class Radio extends Vue {
+	@Model('change') private model;
+
+	@Prop() private value;
+	@Prop() private disabled;
+
+	public get checked() {
+		return this.model === this.value;
 	}
-});
+
+	public toggle() {
+			this.$emit('change', this.value);
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

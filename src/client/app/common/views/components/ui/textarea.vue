@@ -18,57 +18,30 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
 
-export default Vue.extend({
-	props: {
-		value: {
-			required: false
-		},
-		required: {
-			type: Boolean,
-			required: false
-		},
-		readonly: {
-			type: Boolean,
-			required: false
-		},
-		pattern: {
-			type: String,
-			required: false
-		},
-		autocomplete: {
-			type: String,
-			required: false
-		},
-		tall: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		pre: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-	},
-	data() {
-		return {
-			focused: false,
-			passwordStrength: ''
-		}
-	},
-	computed: {
-		filled(): boolean {
-			return this.value != '' && this.value != null;
-		}
-	},
-	methods: {
-		focus() {
-			this.$refs.input.focus();
-		}
+@Component
+export default class Textarea extends Vue {
+	@Prop() private value;
+	@Prop() private required: boolean;
+	@Prop() private readonly: boolean;
+	@Prop() private pattern: string;
+	@Prop() private autocomplete: string;
+	@Prop({ default: false }) private tall: boolean;
+	@Prop({ default: false }) private pre: boolean;
+	@Ref() private input: HTMLElement;
+
+	private focused = false;
+	private passwordStrength = '';
+
+	public filled() {
+		return this.value != '' && this.value != null;
 	}
-});
+
+		public focus() {
+		this.input.focus();
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

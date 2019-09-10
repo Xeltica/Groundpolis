@@ -7,21 +7,12 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	props: {
-		round: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		primary: {
-			type: Boolean,
-			required: false,
-			default: false
-		}
-	}
-});
+import { Vue, Component, Prop } from 'vue-property-decorator';
+@Component
+export default class Button extends Vue {
+	@Prop({ default: false }) private round: boolean;
+	@Prop({ default: false }) private primary: boolean;
+}
 </script>
 
 <style lang="stylus" scoped>

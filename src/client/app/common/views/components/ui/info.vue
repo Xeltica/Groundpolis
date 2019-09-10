@@ -7,16 +7,11 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	props: {
-		warn: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-	},
-});
+import { Vue, Component, Prop } from 'vue-property-decorator';
+@Component
+export default class Info extends Vue {
+	@Prop({ default: false }) private warn: boolean;
+}
 </script>
 
 <style lang="stylus" scoped>

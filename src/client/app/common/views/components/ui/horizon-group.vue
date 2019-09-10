@@ -5,34 +5,23 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({
-	provide: {
-		horizonGrouped: true
-	},
-	props: {
-		inputs: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		noGrow: {
-			type: Boolean,
-			required: false,
-			default: false
-		}
-	},
-	data() {
-		return {
-			children: 0
-		};
-	},
-	mounted() {
+import { Vue, Component, Provide, Prop } from 'vue-property-decorator';
+@Component
+export default class Vm extends Vue {
+	@Provide() private horizonGrouped = true;
+	@Prop({ default: false }) private inputs: boolean;
+	@Prop({ default: false }) private noGrow: boolean;
+
+	private children = 0;
+
+	public mounted() {
 		this.$nextTick(() => {
-			this.children = this.$slots.default.length;
+			if (this.$slots) {
+				this.children = this.$slots.default!.length;
+			}
 		});
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

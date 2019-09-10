@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-export default Vue.extend({});
+import Vue from 'vue';
+export default Vue.extend();
 </script>
 
 <style lang="stylus" scoped>
