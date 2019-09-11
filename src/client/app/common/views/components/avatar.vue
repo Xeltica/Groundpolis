@@ -17,78 +17,66 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import { getStaticImageUrl } from '../../../common/scripts/get-static-image-url';
 import ImageViewer from './image-viewer.vue';
+import { User } from '../../../../../models/entities/user';
 
-export default Vue.extend({
-	props: {
-		user: {
-			type: Object,
-			required: true
-		},
-		target: {
-			required: false,
-			default: null
-		},
-		disableLink: {
-			required: false,
-			default: false
-		},
-		disablePreview: {
-			required: false,
-			default: false
-		},
-		showImageOnClick: {
-			required: false,
-			default: false
-		},
-	},
-	computed: {
-		lightmode(): boolean {
+@Component
+export default class Avatar extends Vue {
+	@Prop() private user: User;
+	@Prop({ default: null }) private target: string | null;
+	@Prop({ default: false }) private disableLink: boolean;
+	@Prop({ default: false }) private disablePreview: boolean;
+	@Prop({ default: false }) private showImageOnClick: boolean;
+
+		public get lightmode(): boolean {
 			return this.$store.state.device.lightmode;
-		},
-		cat(): boolean {
+		}
+
+		public get cat(): boolean {
 			return this.user.isCat && this.$store.state.settings.circleIcons;
-		},
-		style(): any {
+		}
+
+		public get style(): any {
 			return {
 				borderRadius: this.$store.state.settings.circleIcons ? '100%' : null
 			};
-		},
-		url(): string {
+		}
+
+		public get url(): string {
 			return this.$store.state.device.disableShowingAnimatedImages
-				? getStaticImageUrl(this.user.avatarUrl)
-				: this.user.avatarUrl;
-		},
-		icon(): any {
+				? getStaticImageUrl(this.user.avatarUrl || '')
+				: this.user.avatarUrl || '';
+		}
+
+		public get icon(): any {
 			return {
 				backgroundColor: this.user.avatarColor,
 				backgroundImage: this.lightmode ? null : `url(${this.url})`,
 				borderRadius: this.$store.state.settings.circleIcons ? '100%' : null
 			};
 		}
-	},
-	mounted() {
+	public mounted() {
 		if (this.user.avatarColor) {
-			this.$el.style.color = this.user.avatarColor;
+			(this.$el as HTMLElement).style.color = this.user.avatarColor;
 		}
-	},
-	methods: {
-		onClick(e) {
+	}
+
+		public onClick(e) {
 			this.$emit('click', e);
-		},
-		showImage(e) {
+		}
+
+		public showImage(e) {
 			this.$emit('click', e);
 			this.$root.new(ImageViewer, {
 				image: {
-					name: this.user.name | this.user.username,
+					name: this.user.name || this.user.username,
 					url: this.url
 				}
 			});
 		}
-	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

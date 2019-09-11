@@ -1,6 +1,7 @@
 <template>
 <svg class="mk-analog-clock" viewBox="0 0 10 10" preserveAspectRatio="none">
-	<circle v-for="angle, i in graduations"
+	<circle v-for="(angle, i) in graduations"
+		:key="i"
 		:cx="5 + (Math.sin(angle) * (5 - graduationsPadding))"
 		:cy="5 - (Math.cos(angle) * (5 - graduationsPadding))"
 		:r="i % 5 == 0 ? 0.125 : 0.05"
@@ -31,78 +32,65 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import * as tinycolor from 'tinycolor2';
 
-export default Vue.extend({
-	props: {
-		dark: {
-			type: Boolean,
-			default: false
-		},
-		smooth: {
-			type: Boolean,
-			default: false
-		}
-	},
+@Component
+export default class AnalogClock extends Vue {
+	@Prop({ default: false }) private dark: boolean;
+	@Prop({ default: false }) private smooth: boolean;
 
-	data() {
-		return {
-			now: new Date(),
-			enabled: true,
+	private now = new Date();
+	private enabled = true;
+	private graduationsPadding = 0.5;
+	private handsPadding = 1;
+	private handsTailLength = 0.7;
+	private hHandLengthRatio = 0.75;
+	private mHandLengthRatio = 1;
+	private sHandLengthRatio = 1;
 
-			graduationsPadding: 0.5,
-			handsPadding: 1,
-			handsTailLength: 0.7,
-			hHandLengthRatio: 0.75,
-			mHandLengthRatio: 1,
-			sHandLengthRatio: 1
-		};
-	},
-
-	computed: {
-		majorGraduationColor(): string {
+		public get majorGraduationColor(): string {
 			return this.dark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)';
-		},
-		minorGraduationColor(): string {
+		}
+		public get minorGraduationColor(): string {
 			return this.dark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
-		},
+		}
 
-		sHandColor(): string {
+		public get sHandColor(): string {
 			return this.dark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)';
-		},
-		mHandColor(): string {
+		}
+		public get mHandColor(): string {
 			return this.dark ? '#fff' : '#777';
-		},
-		hHandColor(): string {
+		}
+		public get hHandColor(): string {
 			return tinycolor(getComputedStyle(document.documentElement).getPropertyValue('--primary')).toHexString();
-		},
+		}
 
-		ms(): number {
-			return this.now.getMilliseconds() * this.smooth;
-		},
-		s(): number {
+		public get ms(): number {
+			return this.now.getMilliseconds() * (this.smooth ? 1 : 0);
+		}
+		public get s(): number {
 			return this.now.getSeconds();
-		},
-		m(): number {
+		}
+		public get m(): number {
 			return this.now.getMinutes();
-		},
-		h(): number {
+		}
+		public get h(): number {
 			return this.now.getHours();
-		},
+		}
 
-		hAngle(): number {
+		public get hAngle(): number {
 			return Math.PI * (this.h % 12 + (this.m + (this.s + this.ms / 1000) / 60) / 60) / 6;
-		},
-		mAngle(): number {
+		}
+		public get mAngle(): number {
 			return Math.PI * (this.m + (this.s + this.ms / 1000) / 60) / 30;
-		},
-		sAngle(): number {
+		}
+		public get sAngle(): number {
 			return Math.PI * (this.s + this.ms / 1000) / 30;
-		},
+		}
 
-		graduations(): any {
-			const angles = [];
+		public get graduations(): any {
+			const angles = [] as any[];
 			for (let i = 0; i < 60; i++) {
 				const angle = Math.PI * i / 30;
 				angles.push(angle);
@@ -110,9 +98,8 @@ export default Vue.extend({
 
 			return angles;
 		}
-	},
 
-	mounted() {
+	public mounted() {
 		const update = () => {
 			if (this.enabled) {
 				this.tick();
@@ -120,18 +107,16 @@ export default Vue.extend({
 			}
 		};
 		update();
-	},
-
-	beforeDestroy() {
-		this.enabled = false;
-	},
-
-	methods: {
-		tick() {
-			this.now = new Date();
-		}
 	}
-});
+
+	public beforeDestroy() {
+		this.enabled = false;
+	}
+
+	public tick() {
+		this.now = new Date();
+	}
+}
 </script>
 
 <style lang="stylus" scoped>

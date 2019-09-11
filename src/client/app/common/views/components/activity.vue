@@ -5,37 +5,27 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import ApexCharts from 'apexcharts';
 
-export default Vue.extend({
-	props: {
-		user: {
-			type: Object,
-			required: true
-		},
-		limit: {
-			type: Number,
-			required: false,
-			default: 21
-		}
-	},
-	data() {
-		return {
-			fetching: true,
-			data: [],
-			peak: null
-		};
-	},
-	mounted() {
+@Component
+export default class Activity extends Vue {
+	@Prop() private user;
+	@Prop({ default: 21 }) private limit: number;
+
+	private fetching = true;
+	private data = [] as any[];
+	private peak: null;
+
+	public mounted() {
 		this.$root.api('charts/user/notes', {
 			userId: this.user.id,
 			span: 'day',
 			limit: this.limit
 		}).then(stats => {
-			const normal = [];
-			const reply = [];
-			const renote = [];
+			const normal = [] as any[];
+			const reply = [] as any[];
+			const renote = [] as any[];
 
 			const now = new Date();
 			const y = now.getFullYear();
@@ -110,5 +100,5 @@ export default Vue.extend({
 			chart.render();
 		});
 	}
-});
+}
 </script>

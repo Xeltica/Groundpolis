@@ -16,36 +16,38 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import { toUnicode as decodePunycode } from 'punycode';
 import { url as local } from '../../../config';
 
-export default Vue.extend({
-	props: ['url', 'rel'],
-	data() {
-		const isSelf = this.url.startsWith(local);
-		const hasRoute = isSelf && (
+@Component
+export default class Url extends Vue {
+	@Prop() private url: string;
+	@Prop() private rel: string;
+	private local = local;
+	private schema: string | null;
+	private hostname: string | null;
+	private port: string | null;
+	private pathname: string | null;
+	private query: string | null;
+	private hash: string | null;
+	private self = false;
+	private hasRoute = false;
+	private attr: string | null;
+	private target: string | null;
+
+	public created() {
+		const url = new URL(this.url);
+		this.self = this.url.startsWith(local);
+		this.hasRoute = this.self && (
 			(this.url.substr(local.length) === '/') ||
 			this.url.substr(local.length).startsWith('/@') ||
 			this.url.substr(local.length).startsWith('/notes/') ||
 			this.url.substr(local.length).startsWith('/tags/') ||
 			this.url.substr(local.length).startsWith('/pages/'));
-		return {
-			local,
-			schema: null,
-			hostname: null,
-			port: null,
-			pathname: null,
-			query: null,
-			hash: null,
-			self: isSelf,
-			hasRoute: hasRoute,
-			attr: hasRoute ? 'to' : 'href',
-			target: hasRoute ? null : '_blank'
-		};
-	},
-	created() {
-		const url = new URL(this.url);
+		this.attr = this.hasRoute ? 'to' : 'href';
+		this.target = this.hasRoute ? null : '_blank';
+
 		this.schema = url.protocol;
 		this.hostname = decodePunycode(url.hostname);
 		this.port = url.port;
@@ -53,7 +55,7 @@ export default Vue.extend({
 		this.query = decodeURIComponent(url.search);
 		this.hash = decodeURIComponent(url.hash);
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

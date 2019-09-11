@@ -7,17 +7,17 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import { host } from '../../../config';
 import { toUnicode } from 'punycode';
-export default Vue.extend({
-	props: ['user', 'detail'],
-	data() {
-		return {
-			host: toUnicode(host)
-		};
-	}
-});
+import { User } from '../../../../../models/entities/user';
+@Component
+export default class Acct extends Vue {
+	@Prop() private user: User;
+	@Prop() private detail: string;
+
+	private host = toUnicode(host);
+}
 </script>
 
 <style lang="stylus" scoped>
