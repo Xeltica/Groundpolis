@@ -8,7 +8,8 @@ import 'prismjs';
 import 'prismjs/themes/prism-okaidia.css';
 import XPrism from 'vue-prism-component';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XPrism
 	},
@@ -32,5 +33,5 @@ export default Vue.extend({
 			return Prism.languages[this.lang] ? this.lang : 'js';
 		}
 	}
-});
+}
 </script>

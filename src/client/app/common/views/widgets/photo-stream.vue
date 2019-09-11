@@ -85,7 +85,7 @@ export default define({
 				: image.thumbnailUrl;
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" module>

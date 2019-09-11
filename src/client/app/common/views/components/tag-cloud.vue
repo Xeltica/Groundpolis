@@ -22,7 +22,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import * as VueWordCloud from 'vuewordcloud';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/tag-cloud.vue'),
 	components: {
 		[VueWordCloud.name]: VueWordCloud
@@ -61,7 +62,7 @@ export default Vue.extend({
 			}
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

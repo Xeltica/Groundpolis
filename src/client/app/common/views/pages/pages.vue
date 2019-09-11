@@ -28,7 +28,8 @@ import { faStickyNote, faHeart } from '@fortawesome/free-regular-svg-icons';
 import i18n from '../../../i18n';
 import XPagePreview from '../../views/components/page-preview.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('pages'),
 	components: {
 		XPagePreview
@@ -60,7 +61,7 @@ export default Vue.extend({
 			this.$router.push(`/i/pages/new`);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

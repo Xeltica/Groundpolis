@@ -49,7 +49,8 @@ import XNotes from './deck.notes.vue';
 import { concat } from '../../../../../prelude/array';
 import ApexCharts from 'apexcharts';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('deck/deck.user-column.vue'),
 
 	components: {
@@ -209,7 +210,7 @@ export default Vue.extend({
 			});
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

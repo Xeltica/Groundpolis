@@ -49,7 +49,8 @@ import {
 	faFilm
 	} from '@fortawesome/free-solid-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		file: {
 			type: Object,
@@ -133,7 +134,7 @@ export default Vue.extend({
 			this.$store.commit('device/set', { key: 'mediaVolume', value: audioTag.volume });
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

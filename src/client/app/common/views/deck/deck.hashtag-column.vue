@@ -17,7 +17,8 @@ import XColumn from './deck.column.vue';
 import XHashtagTl from './deck.hashtag-tl.vue';
 import ApexCharts from 'apexcharts';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XColumn,
 		XHashtagTl
@@ -105,7 +106,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

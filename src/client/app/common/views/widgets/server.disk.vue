@@ -14,7 +14,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import XPie from './server.pie.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XPie
 	},
@@ -42,7 +43,7 @@ export default Vue.extend({
 			this.available = stats.disk.available;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

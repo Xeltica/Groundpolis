@@ -8,7 +8,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import XReaction from './reactions-viewer.reaction.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XReaction
 	},
@@ -28,7 +29,7 @@ export default Vue.extend({
 			return this.$store.getters.isSignedIn && this.$store.state.i.id === this.note.userId;
 		},
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

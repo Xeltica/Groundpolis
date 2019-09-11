@@ -65,7 +65,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { v4 as uuid } from 'uuid';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: ['connection'],
 	data() {
 		return {
@@ -124,7 +125,7 @@ export default Vue.extend({
 			for (const stats of statsLog.reverse()) this.onStats(stats);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

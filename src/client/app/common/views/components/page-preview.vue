@@ -17,14 +17,15 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		page: {
 			type: Object,
 			required: true
 		},
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

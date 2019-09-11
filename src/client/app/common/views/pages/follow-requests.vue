@@ -24,7 +24,8 @@ import i18n from '../../../i18n';
 import Progress from '../../scripts/loading';
 import { faUserClock } from '@fortawesome/free-solid-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/pages/follow-requests.vue'),
 	data() {
 		return {
@@ -58,7 +59,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

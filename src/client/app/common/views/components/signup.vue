@@ -55,7 +55,8 @@ const getPasswordStrength = require('syuilo-password-strength');
 import { host, url } from '../../../config';
 import { toUnicode } from 'punycode';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/signup.vue'),
 
 	data() {
@@ -176,7 +177,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

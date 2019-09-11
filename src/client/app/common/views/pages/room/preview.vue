@@ -6,7 +6,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import * as THREE from 'three';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	data() {
 		return {
 			selected: null,
@@ -102,5 +103,5 @@ export default Vue.extend({
 
 		render();
 	},
-});
+}
 </script>

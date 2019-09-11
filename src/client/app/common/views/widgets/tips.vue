@@ -78,7 +78,7 @@ export default define({
 			}, 500);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

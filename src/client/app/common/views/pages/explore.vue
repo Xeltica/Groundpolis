@@ -51,7 +51,8 @@ import i18n from '../../../i18n';
 import { faChartLine, faPlus, faHashtag, faCertificate } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark, faCommentAlt } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/pages/explore.vue'),
 
 	props: {
@@ -156,7 +157,7 @@ export default Vue.extend({
 	mounted() {
 		document.title = this.$root.instanceName;
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

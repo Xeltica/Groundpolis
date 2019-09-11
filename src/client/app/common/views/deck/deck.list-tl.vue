@@ -6,7 +6,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import XNotes from './deck.notes.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XNotes
 	},
@@ -79,5 +80,5 @@ export default Vue.extend({
 			this.$refs.timeline.focus();
 		}
 	}
-});
+}
 </script>

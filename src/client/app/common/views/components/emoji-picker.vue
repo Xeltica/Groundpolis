@@ -39,7 +39,8 @@ import { lib } from 'emojilib';
 import { faAsterisk, faLeaf, faUtensils, faFutbol, faCity, faDice } from '@fortawesome/free-solid-svg-icons';
 import { faHeart, faFlag } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/emoji-picker.vue'),
 
 	data() {
@@ -109,7 +110,7 @@ export default Vue.extend({
 			this.$emit('chosen', emoji);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

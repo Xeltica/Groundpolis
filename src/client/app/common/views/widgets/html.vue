@@ -63,7 +63,7 @@ export default define({
 			this.isSetting = false;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

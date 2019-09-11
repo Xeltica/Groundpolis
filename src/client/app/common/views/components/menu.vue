@@ -16,7 +16,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import anime from 'animejs';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		source: {
 			required: true
@@ -114,7 +115,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

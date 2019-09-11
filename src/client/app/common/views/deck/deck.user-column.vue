@@ -71,7 +71,8 @@ import parseAcct from '../../../../../misc/acct/parse';
 import XColumn from './deck.column.vue';
 import XUserMenu from '../../../common/views/components/user-menu.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('deck/deck.user-column.vue'),
 	components: {
 		XColumn,
@@ -124,7 +125,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

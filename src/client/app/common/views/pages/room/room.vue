@@ -62,7 +62,8 @@ import { query as urlQuery } from '../../../../../../prelude/url';
 
 let room: Room;
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('room'),
 
 	components: {
@@ -268,7 +269,7 @@ export default Vue.extend({
 			this.changed = true;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

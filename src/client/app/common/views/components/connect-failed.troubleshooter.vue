@@ -42,7 +42,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import { apiUrl } from '../../../config';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/connect-failed.troubleshooter.vue'),
 	data() {
 		return {
@@ -79,7 +80,7 @@ export default Vue.extend({
 			this.internet = false;
 		});
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

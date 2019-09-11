@@ -60,7 +60,8 @@ import { faPencilAlt, faPlug } from '@fortawesome/free-solid-svg-icons';
 import { isLiteralBlock, funcDefs, blockDefs } from '../../../../../../misc/aiscript/index';
 import { v4 as uuid } from 'uuid';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('pages'),
 
 	components: {
@@ -225,7 +226,7 @@ export default Vue.extend({
 			return this.aiScript.getExpectedType(this.value, slot);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

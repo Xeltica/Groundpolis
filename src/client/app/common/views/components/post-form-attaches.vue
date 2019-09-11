@@ -22,7 +22,8 @@ import { faTimesCircle, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import XFileThumbnail from './drive-file-thumbnail.vue'
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/post-form-attaches.vue'),
 
 	components: {
@@ -77,7 +78,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

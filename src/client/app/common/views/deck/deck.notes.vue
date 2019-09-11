@@ -40,7 +40,8 @@ import i18n from '../../../i18n';
 import shouldMuteNote from '../../../common/scripts/should-mute-note';
 import paging from '../../../common/scripts/paging';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n(),
 
 	inject: ['column', 'isScrollTop', 'count'],
@@ -106,7 +107,7 @@ export default Vue.extend({
 			(this.$refs.notes as any).children[0].focus ? (this.$refs.notes as any).children[0].focus() : (this.$refs.notes as any).$el.children[0].focus();
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

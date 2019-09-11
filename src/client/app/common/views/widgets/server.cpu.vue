@@ -13,7 +13,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import XPie from './server.pie.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XPie
 	},
@@ -34,7 +35,7 @@ export default Vue.extend({
 			this.usage = stats.cpu_usage;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

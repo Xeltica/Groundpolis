@@ -12,7 +12,7 @@
 import define from '../../../common/define-widget';
 export default define({
 	name: 'nav'
-});
+}
 </script>
 
 <style lang="stylus" scoped>

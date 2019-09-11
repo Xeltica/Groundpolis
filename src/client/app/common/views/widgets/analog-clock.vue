@@ -22,7 +22,7 @@ export default define({
 			this.save();
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

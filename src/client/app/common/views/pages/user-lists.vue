@@ -20,7 +20,8 @@ import i18n from '../../../i18n';
 import { faListUl, faPlus } from '@fortawesome/free-solid-svg-icons';
 import XAvatars from '../../views/components/avatars.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/user-lists.vue'),
 	components: {
 		XAvatars
@@ -60,7 +61,7 @@ export default Vue.extend({
 			});
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

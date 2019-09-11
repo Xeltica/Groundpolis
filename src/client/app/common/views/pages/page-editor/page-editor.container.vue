@@ -30,7 +30,8 @@ import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
 import i18n from '../../../../i18n';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('pages'),
 
 	props: {
@@ -70,7 +71,7 @@ export default Vue.extend({
 			this.$emit('remove');
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

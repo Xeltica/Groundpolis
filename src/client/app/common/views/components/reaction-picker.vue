@@ -28,7 +28,8 @@ import i18n from '../../../i18n';
 import anime from 'animejs';
 import { emojiRegex } from '../../../../../misc/emoji-regex';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/reaction-picker.vue'),
 	props: {
 		note: {
@@ -215,7 +216,7 @@ export default Vue.extend({
 			this.$refs.buttons.childNodes[this.focus].click();
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

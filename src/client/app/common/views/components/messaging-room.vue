@@ -36,7 +36,8 @@ import XForm from './messaging-room.form.vue';
 import { url } from '../../../config';
 import { faArrowCircleDown, faFlag } from '@fortawesome/free-solid-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/messaging-room.vue'),
 
 	components: {
@@ -295,7 +296,7 @@ export default Vue.extend({
 			}
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

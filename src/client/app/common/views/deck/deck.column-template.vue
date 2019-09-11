@@ -14,7 +14,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import XColumn from './deck.column.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XColumn,
 	},
@@ -41,5 +42,5 @@ export default Vue.extend({
 			this.icon = v.icon;
 		}
 	}
-});
+}
 </script>

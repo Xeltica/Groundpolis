@@ -18,7 +18,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import XTroubleshooter from './connect-failed.troubleshooter.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/connect-failed.vue'),
 	components: {
 		XTroubleshooter
@@ -37,7 +38,7 @@ export default Vue.extend({
 			location.reload(true);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

@@ -12,7 +12,8 @@ import copyToClipboard from '../../../common/scripts/copy-to-clipboard';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/note-menu.vue'),
 	props: ['note', 'source', 'actualNote'],
 	data() {
@@ -260,5 +261,5 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>

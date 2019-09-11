@@ -19,7 +19,8 @@ import XWidgetsColumn from './deck.widgets-column.vue';
 import XMentionsColumn from './deck.mentions-column.vue';
 import XDirectColumn from './deck.direct-column.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XTlColumn,
 		XNotificationsColumn,
@@ -45,5 +46,5 @@ export default Vue.extend({
 			this.$children[0].focus();
 		}
 	}
-});
+}
 </script>

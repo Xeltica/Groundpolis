@@ -19,7 +19,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import XBanner from './media-banner.vue';
 import XImage from './media-image.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XBanner,
 		XImage
@@ -45,7 +46,7 @@ export default Vue.extend({
 			return file.type.startsWith('video') || file.type.startsWith('image');
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

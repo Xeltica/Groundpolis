@@ -33,7 +33,8 @@ import { countIf } from '../../../../../prelude/array';
 import { faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { faWindowMaximize } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('deck'),
 	props: {
 		column: {
@@ -314,7 +315,7 @@ export default Vue.extend({
 			}
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

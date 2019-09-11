@@ -105,7 +105,8 @@ import { ASTypeChecker } from '../../../../../../misc/aiscript/type-checker';
 import { url } from '../../../../config';
 import { collectPageVars } from '../../../scripts/collect-page-vars';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('pages'),
 
 	components: {
@@ -419,7 +420,7 @@ export default Vue.extend({
 			this.eyeCatchingImageId = null;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

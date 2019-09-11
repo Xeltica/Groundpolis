@@ -23,7 +23,8 @@ import Menu from '../../../common/views/components/menu.vue';
 
 import { v4 as uuid } from 'uuid';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('deck'),
 
 	components: {
@@ -307,7 +308,7 @@ export default Vue.extend({
 			return ['home', 'local', 'hybrid', 'global', 'list', 'hashtag', 'mentions', 'direct'].includes(column.type);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" module>

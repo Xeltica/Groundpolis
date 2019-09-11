@@ -16,7 +16,8 @@ import XColumn from './deck.column.vue';
 import XNotes from './deck.notes.vue';
 import { genSearchQuery } from '../../../common/scripts/gen-search-query';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XColumn,
 		XNotes
@@ -43,5 +44,5 @@ export default Vue.extend({
 			this.$refs.timeline.reload();
 		}
 	},
-});
+}
 </script>

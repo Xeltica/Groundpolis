@@ -10,7 +10,8 @@ import { faNewspaper } from '@fortawesome/free-solid-svg-icons';
 import i18n from '../../../i18n';
 //import Progress from '../../../common/scripts/loading';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n(),
 
 	props: {
@@ -44,5 +45,5 @@ export default Vue.extend({
 	mounted() {
 		document.title = this.$root.instanceName;
 	},
-});
+}
 </script>

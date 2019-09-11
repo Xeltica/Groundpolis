@@ -16,7 +16,8 @@ import { faBolt, faMagic } from '@fortawesome/free-solid-svg-icons';
 import i18n from '../../../../../i18n';
 import XContainer from '../page-editor.container.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('pages'),
 
 	components: {
@@ -38,7 +39,7 @@ export default Vue.extend({
 	created() {
 		if (this.value.name == null) Vue.set(this.value, 'name', '');
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

@@ -49,7 +49,8 @@ import i18n from '../../../i18n';
 import { faCrown, faICursor, faUsers, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/user-group-editor.vue'),
 
 	props: {
@@ -213,7 +214,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

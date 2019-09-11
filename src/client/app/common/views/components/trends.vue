@@ -20,7 +20,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import XChart from './trends.chart.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/trends.vue'),
 	components: {
 		XChart
@@ -47,7 +48,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

@@ -21,7 +21,8 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		value: {
 			type: Number,
@@ -41,7 +42,7 @@ export default Vue.extend({
 			return (1 - this.value) * (Math.PI * (this.r * 2));
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

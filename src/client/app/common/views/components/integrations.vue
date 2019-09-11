@@ -10,12 +10,13 @@
 import { Vue, Component } from 'vue-property-decorator';
 import XIntegration from './integrations.integration.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XIntegration
 	},
 	props: ['user']
-});
+}
 </script>
 
 <style lang="stylus" scoped>

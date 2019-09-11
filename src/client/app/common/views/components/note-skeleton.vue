@@ -14,7 +14,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import VueContentLoading from 'vue-content-loading';
 import * as tinycolor from 'tinycolor2';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		VueContentLoading,
 	},
@@ -48,5 +49,5 @@ export default Vue.extend({
 		if (width < 400) width = 400;
 		this.width = width;
 	}
-});
+}
 </script>

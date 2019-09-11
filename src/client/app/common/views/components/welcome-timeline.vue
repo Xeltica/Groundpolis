@@ -27,7 +27,8 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		max: {
 			type: Number,
@@ -81,7 +82,7 @@ export default Vue.extend({
 			this.notes.unshift(note);
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

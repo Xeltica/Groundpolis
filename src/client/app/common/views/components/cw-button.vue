@@ -11,7 +11,8 @@ import i18n from '../../../i18n';
 import { length } from 'stringz';
 import { concat } from '../../../../../prelude/array';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/cw-button.vue'),
 
 	props: {
@@ -42,7 +43,7 @@ export default Vue.extend({
 			this.$emit('input', !this.value);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

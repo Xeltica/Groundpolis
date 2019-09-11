@@ -61,7 +61,8 @@ import { faUser, faUsers } from '@fortawesome/free-solid-svg-icons';
 import i18n from '../../../i18n';
 import getAcct from '../../../../../misc/acct/render';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/messaging.vue'),
 	props: {
 		compact: {
@@ -214,7 +215,7 @@ export default Vue.extend({
 			this.navigateGroup(group);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

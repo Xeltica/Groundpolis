@@ -15,7 +15,8 @@ import XNotes from './deck.notes.vue';
 import { faMinusCircle } from '@fortawesome/free-solid-svg-icons';
 import i18n from '../../../i18n';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('deck'),
 
 	components: {
@@ -118,7 +119,7 @@ export default Vue.extend({
 			(this.$refs.timeline as any).focus();
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

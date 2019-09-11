@@ -58,7 +58,7 @@ export default define({
 			this.changed = false;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

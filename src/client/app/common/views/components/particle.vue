@@ -5,7 +5,8 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		x: {
 			type: Number,
@@ -30,7 +31,7 @@ export default Vue.extend({
 			this.destroyDom();
 		}, 1000);
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

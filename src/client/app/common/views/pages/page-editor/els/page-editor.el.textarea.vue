@@ -14,7 +14,8 @@ import { faAlignLeft } from '@fortawesome/free-solid-svg-icons';
 import i18n from '../../../../../i18n';
 import XContainer from '../page-editor.container.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('pages'),
 
 	components: {
@@ -36,7 +37,7 @@ export default Vue.extend({
 	created() {
 		if (this.value.text == null) Vue.set(this.value, 'text', '');
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

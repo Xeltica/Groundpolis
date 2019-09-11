@@ -48,7 +48,8 @@ import { faUsers, faPlus, faCheck, faBan, faEnvelopeOpenText } from '@fortawesom
 import i18n from '../../../i18n';
 import XAvatars from '../../views/components/avatars.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/user-groups.vue'),
 	components: {
 		XAvatars
@@ -122,7 +123,7 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

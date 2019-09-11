@@ -17,7 +17,8 @@ import i18n from '../../../i18n';
 import XColumn from './deck.column.vue';
 import XPage from '../../../common/views/components/page/page.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n(),
 
 	components: {
@@ -65,5 +66,5 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>

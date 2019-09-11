@@ -14,7 +14,7 @@ export default define({
 			codename
 		};
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

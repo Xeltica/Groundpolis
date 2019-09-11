@@ -25,7 +25,8 @@ import i18n from '../../../i18n';
 import { apiUrl } from '../../../config';
 import getMD5 from '../../scripts/get-md5';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/uploader.vue'),
 	data() {
 		return {
@@ -102,7 +103,7 @@ export default Vue.extend({
 			reader.readAsArrayBuffer(file);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

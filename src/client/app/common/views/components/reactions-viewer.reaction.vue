@@ -20,7 +20,8 @@ import Icon from './reaction-icon.vue';
 import anime from 'animejs';
 import XDetails from './reactions-viewer.details.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		reaction: {
 			type: String,
@@ -165,7 +166,7 @@ export default Vue.extend({
 			});
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

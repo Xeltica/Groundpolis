@@ -218,7 +218,7 @@ export default define({
 			this.files = [];
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

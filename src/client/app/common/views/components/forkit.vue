@@ -10,13 +10,14 @@
 
 <script lang="ts">
 import Vue from 'vue'
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	data() {
 		return {
 			repositoryUrl: 'https://github.com/xeltica/groundpolis'
 		};
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

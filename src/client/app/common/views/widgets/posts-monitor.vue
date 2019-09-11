@@ -167,7 +167,7 @@ export default define({
 			for (const stats of statsLog) this.onStats(stats);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

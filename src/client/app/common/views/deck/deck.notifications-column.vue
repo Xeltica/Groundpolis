@@ -12,7 +12,8 @@ import i18n from '../../../i18n';
 import XColumn from './deck.column.vue';
 import XNotifications from './deck.notifications.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n(),
 	components: {
 		XColumn,
@@ -71,5 +72,5 @@ export default Vue.extend({
 			}
 		}];
 	},
-});
+}
 </script>

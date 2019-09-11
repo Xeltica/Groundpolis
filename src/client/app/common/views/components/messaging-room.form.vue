@@ -32,7 +32,8 @@ import i18n from '../../../i18n';
 import * as autosize from 'autosize';
 import { formatTimeString } from '../../../../../misc/format-time-string';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/messaging-room.form.vue'),
 	props: {
 		user: {
@@ -223,7 +224,7 @@ export default Vue.extend({
 			localStorage.setItem('message_drafts', JSON.stringify(data));
 		},
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

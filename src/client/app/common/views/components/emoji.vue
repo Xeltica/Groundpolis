@@ -11,7 +11,8 @@ import { Vue, Component } from 'vue-property-decorator';
 import { getStaticImageUrl } from '../../../common/scripts/get-static-image-url';
 import { twemojiBase } from '../../../../../misc/twemoji-base';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		name: {
 			type: String,
@@ -94,7 +95,7 @@ export default Vue.extend({
 			this.url = `${twemojiBase}/2/svg/${codes.join('-')}.svg`;
 		}
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

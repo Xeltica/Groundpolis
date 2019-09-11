@@ -10,7 +10,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import formatUptime from '../../scripts/format-uptime';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: ['connection'],
 	data() {
 		return {
@@ -30,7 +31,7 @@ export default Vue.extend({
 			this.os = formatUptime(stats.os_uptime);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

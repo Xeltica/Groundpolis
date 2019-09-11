@@ -27,5 +27,5 @@ export default define({
 			this.save();
 		}
 	}
-});
+}
 </script>

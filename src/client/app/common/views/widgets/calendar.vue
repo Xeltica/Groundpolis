@@ -115,7 +115,7 @@ export default define({
 				false;
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

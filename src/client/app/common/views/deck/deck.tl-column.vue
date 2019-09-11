@@ -40,7 +40,8 @@ import XTl from './deck.tl.vue';
 import XListTl from './deck.list-tl.vue';
 import XHashtagTl from './deck.hashtag-tl.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('deck/deck.tl-column.vue'),
 	components: {
 		XColumn,
@@ -97,5 +98,5 @@ export default Vue.extend({
 			this.$refs.tl.focus();
 		}
 	}
-});
+}
 </script>

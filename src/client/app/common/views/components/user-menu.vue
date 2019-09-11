@@ -10,7 +10,8 @@ import i18n from '../../../i18n';
 import { faExclamationCircle, faMicrophoneSlash, faSync } from '@fortawesome/free-solid-svg-icons';
 import { faSnowflake } from '@fortawesome/free-regular-svg-icons';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/user-menu.vue'),
 
 	props: ['user', 'source'],
@@ -242,5 +243,5 @@ export default Vue.extend({
 			});
 		}
 	}
-});
+}
 </script>

@@ -28,6 +28,7 @@ export class ASEvaluator {
 
 		this.envVars = {
 			AI: 'kawaii',
+			CITRINE: 'kawaii',
 			VERSION: opts.version,
 			URL: opts.page ? `${opts.url}/@${opts.page.user.username}/pages/${opts.page.name}` : '',
 			LOGIN: opts.visitor != null,

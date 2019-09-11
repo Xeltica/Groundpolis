@@ -49,7 +49,8 @@ import { apiUrl, host } from '../../../config';
 import { toUnicode } from 'punycode';
 import { hexifyAB } from '../../scripts/2fa';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/signin.vue'),
 
 	props: {
@@ -183,7 +184,7 @@ export default Vue.extend({
 			}
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

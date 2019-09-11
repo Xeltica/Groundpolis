@@ -121,7 +121,7 @@ export default define({
 			});
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

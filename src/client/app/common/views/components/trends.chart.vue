@@ -33,7 +33,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { v4 as uuid } from 'uuid';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		src: {
 			type: Array,
@@ -85,5 +86,5 @@ export default Vue.extend({
 			this.headY = polylinePoints[polylinePoints.length - 1][1];
 		}
 	}
-});
+}
 </script>

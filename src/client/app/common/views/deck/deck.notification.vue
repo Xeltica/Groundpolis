@@ -98,14 +98,15 @@
 import { Vue, Component } from 'vue-property-decorator';
 import getNoteSummary from '../../../../../misc/get-note-summary';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: ['notification'],
 	data() {
 		return {
 			getNoteSummary
 		};
 	},
-});
+}
 </script>
 
 <style lang="stylus" scoped>

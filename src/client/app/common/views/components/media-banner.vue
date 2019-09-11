@@ -29,7 +29,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/media-banner.vue'),
 	props: {
 		media: {

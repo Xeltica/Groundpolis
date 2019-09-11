@@ -57,7 +57,8 @@ import { erase } from '../../../../../prelude/array';
 import { addTimespan } from '../../../../../prelude/time';
 import { formatDateTimeString } from '../../../../../misc/format-time-string';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n('common/views/components/poll-editor.vue'),
 	data() {
 		return {
@@ -136,7 +137,7 @@ export default Vue.extend({
 			}
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

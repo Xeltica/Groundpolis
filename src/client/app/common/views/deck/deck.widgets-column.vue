@@ -57,7 +57,8 @@ import XColumn from './deck.column.vue';
 import * as XDraggable from 'vuedraggable';
 import { v4 as uuid } from 'uuid';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n(),
 	components: {
 		XColumn,
@@ -134,7 +135,7 @@ export default Vue.extend({
 			this.$store.commit('updateDeckColumn', this.column);
 		}
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

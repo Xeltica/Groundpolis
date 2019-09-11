@@ -6,11 +6,12 @@
 import { Vue, Component } from 'vue-property-decorator';
 import MfmCore from './mfm';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		MfmCore
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

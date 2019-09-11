@@ -20,7 +20,8 @@ import i18n from '../../../i18n';
 import { toUnicode } from 'punycode';
 import { host as localHost } from '../../../config';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	i18n: i18n(),
 	props: {
 		username: {
@@ -59,7 +60,7 @@ export default Vue.extend({
 	methods: {
 		toUnicode
 	}
-});
+}
 </script>
 
 <style lang="stylus" scoped>

@@ -7,7 +7,8 @@
 import { Vue, Component } from 'vue-property-decorator';
 import * as katex from 'katex';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	props: {
 		formula: {
 			type: String,
@@ -25,7 +26,7 @@ export default Vue.extend({
 			} as any);
 		}
 	}
-});
+}
 </script>
 
 <style>

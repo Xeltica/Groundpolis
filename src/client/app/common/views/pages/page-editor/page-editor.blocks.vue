@@ -21,7 +21,8 @@ import XPost from './els/page-editor.el.post.vue';
 import XCounter from './els/page-editor.el.counter.vue';
 import XRadioButton from './els/page-editor.el.radio-button.vue';
 
-export default Vue.extend({
+@Component
+export default class Vm extends Vue {
 	components: {
 		XDraggable, XSection, XText, XImage, XButton, XTextarea, XTextInput, XTextareaInput, XNumberInput, XSwitch, XIf, XPost, XCounter, XRadioButton
 	},
@@ -62,5 +63,5 @@ export default Vue.extend({
 			this.$emit('input', newValue);
 		},
 	}
-});
+}
 </script>
