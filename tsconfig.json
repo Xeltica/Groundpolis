@@ -31,6 +31,6 @@
   ],
   "exclude": [
     "./src/client/app/**/*.ts",
-    "./src/client/app/**/*.vue",
+    "./src/client/app/**/*.vue"
   ]
 }
