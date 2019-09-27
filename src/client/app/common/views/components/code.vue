@@ -3,27 +3,16 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	components: {
-		XCode: () => import('./code-core.vue').then(m => m.default)
+		XCode: () => import('./code-core.vue').then(m => m.default),
 	},
-
-	props: {
-		code: {
-			type: String,
-			required: true
-		},
-		lang: {
-			type: String,
-			required: false
-		},
-		inline: {
-			type: Boolean,
-			required: false
-		}
-	}
+})
+export default class Code extends Vue {
+	@Prop() private readonly code!: string;
+	@Prop() private readonly lang: string;
+	@Prop() private readonly inline: boolean;
 }
 </script>

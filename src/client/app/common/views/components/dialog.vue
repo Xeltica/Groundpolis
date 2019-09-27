@@ -24,11 +24,11 @@
 			<ui-input v-if="user" v-model="userInputValue" autofocus @keydown="onInputKeydown"><template #prefix>@</template></ui-input>
 			<ui-select v-if="select" v-model="selectedValue" autofocus>
 				<template v-if="select.items">
-					<option v-for="item in select.items" :value="item.value">{{ item.text }}</option>
+					<option v-for="item in select.items" :value="item.value" :key="item.value">{{ item.text }}</option>
 				</template>
 				<template v-else>
-					<optgroup v-for="groupedItem in select.groupedItems" :label="groupedItem.label">
-						<option v-for="item in groupedItem.items" :value="item.value">{{ item.text }}</option>
+					<optgroup v-for="groupedItem in select.groupedItems" :label="groupedItem.label" :key="groupedItem.label">
+						<option v-for="item in groupedItem.items" :value="item.value" :key="item.value">{{ item.text }}</option>
 					</optgroup>
 				</template>
 			</ui-select>
@@ -42,82 +42,46 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import anime from 'animejs';
 import { faTimesCircle, faQuestionCircle } from '@fortawesome/free-regular-svg-icons';
-import parseAcct from "../../../../../misc/acct/parse";
+import parseAcct from '../../../../../misc/acct/parse';
 import i18n from '../../../i18n';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n(),
-	props: {
-		type: {
-			type: String,
-			required: false,
-			default: 'info'
-		},
-		title: {
-			type: String,
-			required: false
-		},
-		text: {
-			type: String,
-			required: false
-		},
-		input: {
-			required: false
-		},
-		select: {
-			required: false
-		},
-		user: {
-			required: false
-		},
-		icon: {
-			required: false
-		},
-		showOkButton: {
-			type: Boolean,
-			default: true
-		},
-		showCancelButton: {
-			type: Boolean,
-			default: false
-		},
-		cancelableByBgClick: {
-			type: Boolean,
-			default: true
-		},
-		splash: {
-			type: Boolean,
-			default: false
+})
+export default class Dialog extends Vue {
+	@Prop({ default: 'info' }) private readonly type: string;
+	@Prop() private readonly title: string;
+	@Prop() private readonly text: string;
+	@Prop() private readonly input;
+	@Prop() private readonly select;
+	@Prop() private readonly user;
+	@Prop({ default: true }) private readonly showOkButton;
+	@Prop({ default: false }) private readonly showCancelButton;
+	@Prop({ default: true }) private readonly cancelableByBgClick;
+	@Prop({ default: false }) private readonly splash;
+
+	private inputValue = this.input && this.input.default ? this.input.default : null;
+	private userInputValue = null as string | null;
+	private selectedValue =  this.select ? this.select.default ? this.select.default : this.select.items ? this.select.items[0].value : this.select.groupedItems[0].items[0].value : null;
+	private canOk = true;
+	private faTimesCircle = faTimesCircle;
+	private faQuestionCircle = faQuestionCircle;
+
+	@Watch('userInputValue')
+	public watchUserInputValue() {
+		if (this.user) {
+			this.$root.api('users/show', parseAcct(this.userInputValue!)).then(u => {
+				this.canOk = u != null;
+			}).catch(() => {
+				this.canOk = false;
+			});
 		}
-	},
+	}
 
-	data() {
-		return {
-			inputValue: this.input && this.input.default ? this.input.default : null,
-			userInputValue: null,
-			selectedValue: this.select ? this.select.default ? this.select.default : this.select.items ? this.select.items[0].value : this.select.groupedItems[0].items[0].value : null,
-			canOk: true,
-			faTimesCircle, faQuestionCircle
-		};
-	},
-
-	watch: {
-		userInputValue() {
-			if (this.user) {
-				this.$root.api('users/show', parseAcct(this.userInputValue)).then(u => {
-					this.canOk = u != null;
-				}).catch(() => {
-					this.canOk = false;
-				});
-			}
-		}
-	},
-
-	mounted() {
+	public mounted() {
 		if (this.user) this.canOk = false;
 
 		this.$nextTick(() => {
@@ -143,67 +107,65 @@ export default class Vm extends Vue {
 				}, 1000);
 			}
 		});
-	},
+	}
 
-	methods: {
-		async ok() {
-			if (!this.canOk) return;
-			if (!this.showOkButton) return;
+	public async ok() {
+		if (!this.canOk) return;
+		if (!this.showOkButton) return;
 
-			if (this.user) {
-				const user = await this.$root.api('users/show', parseAcct(this.userInputValue));
-				if (user) {
-					this.$emit('ok', user);
-					this.close();
-				}
-			} else {
-				const result =
-					this.input ? this.inputValue :
-					this.select ? this.selectedValue :
-					true;
-				this.$emit('ok', result);
+		if (this.user) {
+			const user = await this.$root.api('users/show', parseAcct(this.userInputValue!));
+			if (user) {
+				this.$emit('ok', user);
 				this.close();
 			}
-		},
-
-		cancel() {
-			this.$emit('cancel');
+		} else {
+			const result =
+				this.input ? this.inputValue :
+				this.select ? this.selectedValue :
+				true;
+			this.$emit('ok', result);
 			this.close();
-		},
+		}
+	}
 
-		close() {
-			this.$el.style.pointerEvents = 'none';
-			(this.$refs.bg as any).style.pointerEvents = 'none';
-			(this.$refs.main as any).style.pointerEvents = 'none';
+	public cancel() {
+		this.$emit('cancel');
+		this.close();
+	}
 
-			anime({
-				targets: this.$refs.bg,
-				opacity: 0,
-				duration: 300,
-				easing: 'linear'
-			});
-			anime({
-				targets: this.$refs.main,
-				opacity: 0,
-				scale: 0.8,
-				duration: 300,
-				easing: 'cubicBezier(0, 0.5, 0.5, 1)',
-				complete: () => this.destroyDom()
-			});
-		},
+	public close() {
+		(this.$el as HTMLElement).style.pointerEvents = 'none';
+		(this.$refs.bg as any).style.pointerEvents = 'none';
+		(this.$refs.main as any).style.pointerEvents = 'none';
 
-		onBgClick() {
-			if (this.cancelableByBgClick) {
-				this.cancel();
-			}
-		},
+		anime({
+			targets: this.$refs.bg,
+			opacity: 0,
+			duration: 300,
+			easing: 'linear'
+		});
+		anime({
+			targets: this.$refs.main,
+			opacity: 0,
+			scale: 0.8,
+			duration: 300,
+			easing: 'cubicBezier(0, 0.5, 0.5, 1)',
+			complete: () => this.destroyDom(),
+		});
+	}
 
-		onInputKeydown(e) {
-			if (e.which == 13) { // Enter
-				e.preventDefault();
-				e.stopPropagation();
-				this.ok();
-			}
+	public onBgClick() {
+		if (this.cancelableByBgClick) {
+			this.cancel();
+		}
+	}
+
+	public onInputKeydown(e) {
+		if (e.which == 13) { // Enter
+			e.preventDefault();
+			e.stopPropagation();
+			this.ok();
 		}
 	}
 }

@@ -18,25 +18,22 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import XTroubleshooter from './connect-failed.troubleshooter.vue';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('common/views/components/connect-failed.vue'),
 	components: {
 		XTroubleshooter
 	},
-	data() {
-		return {
-			troubleshooting: false
-		};
-	},
-	mounted() {
+})
+export default class ConnectFailed extends Vue {
+	private troubleshooting = false;
+
+	public mounted() {
 		document.title = 'Oops!';
 		document.documentElement.style.setProperty('background', '#f8f8f8', 'important');
-	},
-	methods: {
-		reload() {
-			location.reload(true);
-		}
+	}
+
+	public reload() {
+		location.reload(true);
 	}
 }
 </script>

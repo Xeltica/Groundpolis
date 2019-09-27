@@ -6,42 +6,29 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import { length } from 'stringz';
 import { concat } from '../../../../../prelude/array';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('common/views/components/cw-button.vue'),
+})
+export default class CwButton extends Vue {
 
-	props: {
-		value: {
-			type: Boolean,
-			required: true
-		},
-		note: {
-			type: Object,
-			required: true
-		}
-	},
+	@Prop() private readonly value!: boolean;
+	@Prop() private readonly note;
 
-	computed: {
-		label(): string {
-			return concat([
-				this.note.text ? [this.$t('chars', { count: length(this.note.text) })] : [],
-				this.note.files && this.note.files.length !== 0 ? [this.$t('files', { count: this.note.files.length }) ] : [],
-				this.note.poll != null ? [this.$t('poll')] : []
-			] as string[][]).join(' / ');
-		}
-	},
+	public get label(): string {
+		return concat([
+			this.note.text ? [this.$t('chars', { count: length(this.note.text) })] : [],
+			this.note.files && this.note.files.length !== 0 ? [this.$t('files', { count: this.note.files.length }) ] : [],
+			this.note.poll != null ? [this.$t('poll')] : []
+		] as string[][]).join(' / ');
+	}
 
-	methods: {
-		length,
-
-		toggle() {
-			this.$emit('input', !this.value);
-		}
+	public toggle() {
+		this.$emit('input', !this.value);
 	}
 }
 </script>

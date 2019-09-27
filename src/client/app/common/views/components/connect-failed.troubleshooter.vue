@@ -42,18 +42,16 @@ import { Vue, Component } from 'vue-property-decorator';
 import i18n from '../../../i18n';
 import { apiUrl } from '../../../config';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('common/views/components/connect-failed.troubleshooter.vue'),
-	data() {
-		return {
-			network: navigator.onLine,
-			end: false,
-			internet: null,
-			server: null
-		};
-	},
-	mounted() {
+})
+export default class XTroubleshooter extends Vue {
+	private network = navigator.onLine;
+	private end = false;
+	private internet = false;
+	private server = false;
+
+	public mounted() {
 		if (!this.network) {
 			this.end = true;
 			return;

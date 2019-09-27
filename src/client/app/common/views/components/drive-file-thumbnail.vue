@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import anime from 'animejs';
 import {
 	faFile,
@@ -50,89 +50,71 @@ import {
 	} from '@fortawesome/free-solid-svg-icons';
 
 @Component
-export default class Vm extends Vue {
-	props: {
-		file: {
-			type: Object,
-			required: true
-		},
-		fit: {
-			type: String,
-			required: false,
-			default: 'cover'
-		},
-		detail: {
-			type: Boolean,
-			required: false,
-			default: false
-		}
-	},
-	data() {
-		return {
-			isContextmenuShowing: false,
-			isDragging: false,
+export default class DriveFileThumbnail extends Vue {
+	@Prop() private readonly file;
+	@Prop({ default: 'cover' }) private readonly fit;
+	@Prop({ default: false }) private readonly detail;
 
-			faFile,
-			faFileAlt,
-			faFileImage,
-			faMusic,
-			faFileVideo,
-			faFileCsv,
-			faFilePdf,
-			faFileArchive,
-			faFilm
-		};
-	},
-	computed: {
-		is(): 'image' | 'video' | 'midi' | 'audio' | 'csv' | 'pdf' | 'textfile' | 'archive' | 'unknown' {
-			if (this.file.type.startsWith('image/')) return 'image';
-			if (this.file.type.startsWith('video/')) return 'video';
-			if (this.file.type === 'audio/midi') return 'midi';
-			if (this.file.type.startsWith('audio/')) return 'audio';
-			if (this.file.type.endsWith('/csv')) return 'csv';
-			if (this.file.type.endsWith('/pdf')) return 'pdf';
-			if (this.file.type.startsWith('text/')) return 'textfile';
-			if ([
-					"application/zip",
-					"application/x-cpio",
-					"application/x-bzip",
-					"application/x-bzip2",
-					"application/java-archive",
-					"application/x-rar-compressed",
-					"application/x-tar",
-					"application/gzip",
-					"application/x-7z-compressed"
-				].some(e => e === this.file.type)) return 'archive';
-			return 'unknown';
-		},
-		isThumbnailAvailable(): boolean {
-			return this.file.thumbnailUrl
-				? (this.is === 'image' || this.is === 'video')
-				: false;
-		},
-		background(): string {
-			return this.file.properties.avgColor || 'transparent';
-		}
-	},
-	mounted() {
+	private isContextmenuShowing = false;
+	private isDragging = false;
+	private faFile = faFile;
+	private faFileAlt = faFileAlt;
+	private faFileImage = faFileImage;
+	private faMusic = faMusic;
+	private faFileVideo = faFileVideo;
+	private faFileCsv = faFileCsv;
+	private faFilePdf = faFilePdf;
+	private faFileArchive = faFileArchive;
+	private faFilm = faFilm;
+
+	public get is(): 'image' | 'video' | 'midi' | 'audio' | 'csv' | 'pdf' | 'textfile' | 'archive' | 'unknown' {
+		if (this.file.type.startsWith('image/')) return 'image';
+		if (this.file.type.startsWith('video/')) return 'video';
+		if (this.file.type === 'audio/midi') return 'midi';
+		if (this.file.type.startsWith('audio/')) return 'audio';
+		if (this.file.type.endsWith('/csv')) return 'csv';
+		if (this.file.type.endsWith('/pdf')) return 'pdf';
+		if (this.file.type.startsWith('text/')) return 'textfile';
+		if ([
+				'application/zip',
+				'application/x-cpio',
+				'application/x-bzip',
+				'application/x-bzip2',
+				'application/java-archive',
+				'application/x-rar-compressed',
+				'application/x-tar',
+				'application/gzip',
+				'application/x-7z-compressed'
+			].some(e => e === this.file.type)) return 'archive';
+		return 'unknown';
+	}
+	public get isThumbnailAvailable(): boolean {
+		return this.file.thumbnailUrl
+			? (this.is === 'image' || this.is === 'video')
+			: false;
+	}
+	public get background(): string {
+		return this.file.properties.avgColor || 'transparent';
+	}
+
+	public mounted() {
 		const audioTag = this.$refs.volumectrl as HTMLAudioElement;
 		if (audioTag) audioTag.volume = this.$store.state.device.mediaVolume;
-	},
-	methods: {
-		onThumbnailLoaded() {
-			if (this.file.properties.avgColor) {
-				anime({
-					targets: this.$refs.thumbnail,
-					backgroundColor: 'transparent', // TODO fade
-					duration: 100,
-					easing: 'linear'
-				});
-			}
-		},
-		volumechange() {
-			const audioTag = this.$refs.volumectrl as HTMLAudioElement;
-			this.$store.commit('device/set', { key: 'mediaVolume', value: audioTag.volume });
+	}
+
+	public onThumbnailLoaded() {
+		if (this.file.properties.avgColor) {
+			anime({
+				targets: this.$refs.thumbnail,
+				backgroundColor: 'transparent', // TODO fade
+				duration: 100,
+				easing: 'linear'
+			});
 		}
+	}
+	public volumechange() {
+		const audioTag = this.$refs.volumectrl as HTMLAudioElement;
+		this.$store.commit('device/set', { key: 'mediaVolume', value: audioTag.volume });
 	}
 }
 </script>

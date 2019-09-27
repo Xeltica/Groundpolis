@@ -3,6 +3,7 @@
 	<header>
 		<button v-for="category in categories"
 			:title="category.text"
+			:key="category.text"
 			@click="go(category)"
 			:class="{ active: category.isActive }"
 		>
@@ -23,6 +24,7 @@
 		<div v-else>
 			<button v-for="emoji in customEmojis"
 				:title="emoji.name"
+				:key="emoji.name"
 				@click="chosen(`:${emoji.name}:`)"
 			>
 				<img :src="emoji.url" :alt="emoji.name"/>
@@ -39,76 +41,71 @@ import { lib } from 'emojilib';
 import { faAsterisk, faLeaf, faUtensils, faFutbol, faCity, faDice } from '@fortawesome/free-solid-svg-icons';
 import { faHeart, faFlag } from '@fortawesome/free-regular-svg-icons';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	i18n: i18n('common/views/components/emoji-picker.vue'),
+})
+export default class EmojiPicker extends Vue {
 
-	data() {
-		return {
-			lib,
-			customEmojis: [],
-			categories: [{
-				text: this.$t('custom-emoji'),
-				icon: faAsterisk,
-				isActive: true
-			}, {
-				name: 'people',
-				text: this.$t('people'),
-				icon: ['far', 'laugh'],
-				isActive: false
-			}, {
-				name: 'animals_and_nature',
-				text: this.$t('animals-and-nature'),
-				icon: faLeaf,
-				isActive: false
-			}, {
-				name: 'food_and_drink',
-				text: this.$t('food-and-drink'),
-				icon: faUtensils,
-				isActive: false
-			}, {
-				name: 'activity',
-				text: this.$t('activity'),
-				icon: faFutbol,
-				isActive: false
-			}, {
-				name: 'travel_and_places',
-				text: this.$t('travel-and-places'),
-				icon: faCity,
-				isActive: false
-			}, {
-				name: 'objects',
-				text: this.$t('objects'),
-				icon: faDice,
-				isActive: false
-			}, {
-				name: 'symbols',
-				text: this.$t('symbols'),
-				icon: faHeart,
-				isActive: false
-			}, {
-				name: 'flags',
-				text: this.$t('flags'),
-				icon: faFlag,
-				isActive: false
-			}]
-		}
-	},
+	private lib = lib;
+	private customEmojis = [] as any[];
+	private categories = [{
+		text: this.$t('custom-emoji'),
+		icon: faAsterisk,
+		isActive: true
+	}, {
+		name: 'people',
+		text: this.$t('people'),
+		icon: ['far', 'laugh'],
+		isActive: false
+	}, {
+		name: 'animals_and_nature',
+		text: this.$t('animals-and-nature'),
+		icon: faLeaf,
+		isActive: false
+	}, {
+		name: 'food_and_drink',
+		text: this.$t('food-and-drink'),
+		icon: faUtensils,
+		isActive: false
+	}, {
+		name: 'activity',
+		text: this.$t('activity'),
+		icon: faFutbol,
+		isActive: false
+	}, {
+		name: 'travel_and_places',
+		text: this.$t('travel-and-places'),
+		icon: faCity,
+		isActive: false
+	}, {
+		name: 'objects',
+		text: this.$t('objects'),
+		icon: faDice,
+		isActive: false
+	}, {
+		name: 'symbols',
+		text: this.$t('symbols'),
+		icon: faHeart,
+		isActive: false
+	}, {
+		name: 'flags',
+		text: this.$t('flags'),
+		icon: faFlag,
+		isActive: false
+	}];
 
-	created() {
+	public created() {
 		this.customEmojis = (this.$root.getMetaSync() || { emojis: [] }).emojis || [];
-	},
+	}
 
-	methods: {
-		go(category) {
-			for (const c of this.categories) {
-				c.isActive = c.name === category.name;
-			}
-		},
-
-		chosen(emoji) {
-			this.$emit('chosen', emoji);
+	public go(category) {
+		for (const c of this.categories) {
+			c.isActive = c.name === category.name;
 		}
+	}
+
+	public chosen(emoji) {
+		this.$emit('chosen', emoji);
 	}
 }
 </script>

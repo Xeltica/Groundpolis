@@ -3,35 +3,23 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
-import 'prismjs';
+import { Vue, Component, Prop } from 'vue-property-decorator';
+import * as Prism from 'prismjs';
 import 'prismjs/themes/prism-okaidia.css';
 import XPrism from 'vue-prism-component';
 
-@Component
-export default class Vm extends Vue {
+@Component({
 	components: {
 		XPrism
 	},
-	props: {
-		code: {
-			type: String,
-			required: true
-		},
-		lang: {
-			type: String,
-			required: false
-		},
-		inline: {
-			type: Boolean,
-			required: false
-		}
-	},
+})
+export default class CodeCore extends Vue {
+	@Prop() private readonly code!: string;
+	@Prop() private readonly lang: string;
+	@Prop() private readonly inline: boolean;
 
-	computed: {
-		prismLang() {
-			return Prism.languages[this.lang] ? this.lang : 'js';
-		}
+	public get prismLang() {
+		return Prism.languages[this.lang] ? this.lang : 'js';
 	}
 }
 </script>

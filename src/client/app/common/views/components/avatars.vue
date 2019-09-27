@@ -5,21 +5,15 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop } from 'vue-property-decorator';
+import { User } from '../../../../../models/entities/user';
 
 @Component
-export default class Vm extends Vue {
-	props: {
-		userIds: {
-			required: true
-		},
-	},
-	data() {
-		return {
-			us: []
-		};
-	},
-	async created() {
+export default class Avatars extends Vue {
+	@Prop() private readonly userIds: string[];
+	private us: User[];
+
+	public async created() {
 		this.us = await this.$root.api('users/show', {
 			userIds: this.userIds
 		});
