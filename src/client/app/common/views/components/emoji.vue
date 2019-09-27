@@ -5,71 +5,45 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 // スクリプトサイズがデカい
 //import { lib } from 'emojilib';
 import { getStaticImageUrl } from '../../../common/scripts/get-static-image-url';
 import { twemojiBase } from '../../../../../misc/twemoji-base';
 
 @Component
-export default class Vm extends Vue {
-	props: {
-		name: {
-			type: String,
-			required: false
-		},
-		emoji: {
-			type: String,
-			required: false
-		},
-		normal: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		customEmojis: {
-			required: false,
-			default: () => []
-		},
-		isReaction: {
-			type: Boolean,
-			default: false
-		},
-	},
+export default class Emoji extends Vue {
+	@Prop() private readonly name: string;
+	@Prop() private readonly emoji: string;
+	@Prop({ default: false }) private readonly normal: boolean;
+	@Prop({ default: () => [] }) private readonly customEmojis;
+	@Prop({ default: false }) private readonly isReaction: boolean;
+	private url: string;
+	private char: string;
+	private customEmoji;
 
-	data() {
-		return {
-			url: null,
-			char: null,
-			customEmoji: null
-		}
-	},
+	public get alt(): string {
+		return this.customEmoji ? `:${this.customEmoji.name}:` : this.char;
+	}
 
-	computed: {
-		alt(): string {
-			return this.customEmoji ? `:${this.customEmoji.name}:` : this.char;
-		},
+	public get useOsDefaultEmojis(): boolean {
+		return this.$store.state.device.useOsDefaultEmojis && !this.isReaction;
+	}
 
-		useOsDefaultEmojis(): boolean {
-			return this.$store.state.device.useOsDefaultEmojis && !this.isReaction;
-		}
-	},
-
-	watch: {
-		customEmojis() {
-			if (this.name) {
-				const customEmoji = this.customEmojis.find(x => x.name == this.name);
-				if (customEmoji) {
-					this.customEmoji = customEmoji;
-					this.url = this.$store.state.device.disableShowingAnimatedImages
-						? getStaticImageUrl(customEmoji.url)
-						: customEmoji.url;
-				}
+	@Watch('customEmojis')
+	public watchCustomEmojis() {
+		if (this.name) {
+			const customEmoji = this.customEmojis.find(x => x.name == this.name);
+			if (customEmoji) {
+				this.customEmoji = customEmoji;
+				this.url = this.$store.state.device.disableShowingAnimatedImages
+					? getStaticImageUrl(customEmoji.url)
+					: customEmoji.url;
 			}
-		},
-	},
+		}
+	}
 
-	created() {
+	public created() {
 		if (this.name) {
 			const customEmoji = this.customEmojis.find(x => x.name == this.name);
 			if (customEmoji) {
@@ -88,13 +62,13 @@ export default class Vm extends Vue {
 		}
 
 		if (this.char) {
-			let codes = Array.from(this.char).map(x => x.codePointAt(0).toString(16));
+			let codes = Array.from(this.char).map(x => x.codePointAt(0)!.toString(16));
 			if (!codes.includes('200d')) codes = codes.filter(x => x != 'fe0f');
 			codes = codes.filter(x => x && x.length);
 
 			this.url = `${twemojiBase}/2/svg/${codes.join('-')}.svg`;
 		}
-	},
+	}
 }
 </script>
 
