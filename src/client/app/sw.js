@@ -16,12 +16,10 @@ self.addEventListener('install', ev => {
 
 	const requests = [
 		'/',
-		`/assets/desktop.${version}.js`,
-		`/assets/mobile.${version}.js`,
-		'/assets/error.jpg'
+		`/assets/app.${version}.js`,
 	];
 
-  ev.waitUntil(
+	ev.waitUntil(
 		caches.open(cacheName)
 			.then(cache => {
 				if (_ENV_ === 'production') {
@@ -29,12 +27,12 @@ self.addEventListener('install', ev => {
 					console.info('Registered caches.');
 					return cache.addAll(requests);
 				} else {
-					// 開発時はキャッシュしない & 既にあるキャッシュを殺す
+					// 開発時はキャッシュしない & 既にあるキャッシュを消す
 					return cache.delete(requests);
 				}
 			})
 			.then(() => self.skipWaiting())
-  );
+	);
 });
 
 self.addEventListener('activate', ev => {
@@ -83,8 +81,8 @@ self.addEventListener('push', ev => {
 });
 
 self.addEventListener('notificationclick', event => {
-  event.notification.close();
+	event.notification.close();
 
-  // Web Push 通知が指定した URL に遷移する
-  event.waitUntil(self.clients.openWindow(event.notification.data.url));
+	// Web Push 通知が指定した URL に遷移する
+	event.waitUntil(self.clients.openWindow(event.notification.data.url));
 });

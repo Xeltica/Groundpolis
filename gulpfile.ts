@@ -37,7 +37,7 @@ gulp.task('build:ts', () => {
 		.src()
 		.pipe(sourcemaps.init())
 		.pipe(tsProject())
-		.on('error', () => {})
+		.on('error', () => { })
 		.pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: '../built' }))
 		.pipe(gulp.dest('./built/'));
 });
@@ -116,15 +116,15 @@ gulp.task('build:client:styles', () =>
 );
 
 gulp.task('copy:client', () =>
-		gulp.src([
-			'./assets/**/*',
-			'./src/client/assets/**/*',
-			'./src/client/app/*/assets/**/*'
-		])
-			.pipe(rename(path => {
-				path.dirname = path.dirname!.replace('assets', '.');
-			}))
-			.pipe(gulp.dest('./built/client/assets/'))
+	gulp.src([
+		'./assets/**/*',
+		'./src/client/assets/**/*',
+		'./src/client/app/*/assets/**/*'
+	])
+		.pipe(rename(path => {
+			path.dirname = path.dirname!.replace('assets', '.');
+		}))
+		.pipe(gulp.dest('./built/client/assets/'))
 );
 
 gulp.task('doc', () =>
@@ -144,7 +144,7 @@ gulp.task('build', gulp.parallel(
 	'build:ts',
 	'build:copy',
 	'build:client',
-	'doc'
+	// 'doc'
 ));
 
 gulp.task('default', gulp.task('build'));

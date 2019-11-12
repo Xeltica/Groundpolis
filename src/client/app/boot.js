@@ -5,7 +5,7 @@
 
 'use strict';
 
-(async function() {
+(async function () {
 	// キャッシュ削除要求があれば従う
 	if (localStorage.getItem('shouldFlush') == 'true') {
 		refresh();
@@ -13,15 +13,6 @@
 	}
 
 	const langs = LANGS;
-
-	//#region Apply theme
-	const theme = localStorage.getItem('theme');
-	if (theme) {
-		for (const [k, v] of Object.entries(JSON.parse(theme))) {
-			document.documentElement.style.setProperty(`--${k}`, v.toString());
-		}
-	}
-	//#endregion
 
 	//#region Load settings
 	let settings = null;
@@ -33,15 +24,6 @@
 
 	// Get the current url information
 	const url = new URL(location.href);
-
-	//#region Detect app name
-	let app = null;
-
-	if (`${url.pathname}/`.startsWith('/docs/')) app = 'docs';
-	if (`${url.pathname}/`.startsWith('/dev/')) app = 'dev';
-	if (`${url.pathname}/`.startsWith('/auth/')) app = 'auth';
-	if (`${url.pathname}/`.startsWith('/admin/')) app = 'admin';
-	//#endregion
 
 	// Script version
 	const ver = localStorage.getItem('v') || VERSION;
@@ -61,8 +43,7 @@
 	}
 
 	if (settings && settings.device.lang &&
-		langs.includes(settings.device.lang))
-	{
+		langs.includes(settings.device.lang)) {
 		lang = settings.device.lang;
 	}
 
@@ -104,31 +85,11 @@
 		head.appendChild(viewport);
 	}
 
-	// Load InstanceTicker
-	// 0 or undefined => don't use InstanceTicker
-	// 1 => InstanceTicker Type-0
-	// 2 => InstanceTicker Type-1
-	let tickerMode = localStorage.getItem('tickerMode');
-
-	if (tickerMode) {
-		const link = document.createElement('link');
-		const type = tickerMode == 1 ? 0 : 1;
-		link.href = `https://wee.jp/csskey/${type}.css`;
-		link.type = 'text/css';
-		link.rel = 'stylesheet';
-		head.appendChild(link);
-	}
-
-	// Switch desktop or mobile version
-	if (app == null) {
-		app = isMobile ? 'mobile' : 'desktop';
-	}
-
 	// Load an app script
 	// Note: 'async' make it possible to load the script asyncly.
 	//       'defer' make it possible to run the script when the dom loaded.
 	const script = document.createElement('script');
-	script.setAttribute('src', `/assets/${app}.${ver}.js`);
+	script.setAttribute('src', `/assets/app.${ver}.js`);
 	script.setAttribute('async', 'true');
 	script.setAttribute('defer', 'true');
 	head.appendChild(script);

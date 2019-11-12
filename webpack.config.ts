@@ -41,11 +41,7 @@ const postcss = {
 
 module.exports = {
 	entry: {
-		desktop: './src/client/app/desktop/script.ts',
-		mobile: './src/client/app/mobile/script.ts',
-		dev: './src/client/app/dev/script.ts',
-		auth: './src/client/app/auth/script.ts',
-		admin: './src/client/app/admin/script.ts',
+		app: './src/client/app/init.ts',
 		sw: './src/client/app/sw.js'
 	},
 	module: {
